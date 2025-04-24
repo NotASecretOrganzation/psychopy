@@ -95,9 +95,11 @@ depends on the type of the [files]:
     )
     # parse args
     args, startFilesRaw = argParser.parse_known_args(sys.argv)
-    
-    # setup prefs
+
+    # import app and prefs now that args have been parsed
     from psychopy.preferences import prefs
+    from psychopy.app import startApp, quitApp
+    # setup prefs
     prefs.getPaths(userDir=args.userDir)
     # insert fallbacks from prefs for unsupplied call args
     if args.showSplash is None:
