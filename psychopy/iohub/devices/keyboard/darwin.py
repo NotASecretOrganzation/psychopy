@@ -48,8 +48,6 @@ psychopy_numlock_key_mappings['.'] = 'num_decimal'
 carbon_path = ctypes.util.find_library('Carbon')
 carbon = ctypes.cdll.LoadLibrary(carbon_path)
 
-_objc = ctypes.PyDLL(objc._objc.__file__)
-
 
 def objcify(ptr):
     return objc.objc_object(c_void_p=ptr)
@@ -126,7 +124,7 @@ class Keyboard(ioHubKeyboardDevice):
     """Keyboard device class for iohub on Mac OS X using Quartz.
     
     This class uses the Quartz API to monitor keyboard events on Mac OS X.    
-    
+
     """
     _last_mod_names = []
     _OS_MODIFIERS = ([(0x00001, 'lctrl'), (0x02000, 'rctrl'),
