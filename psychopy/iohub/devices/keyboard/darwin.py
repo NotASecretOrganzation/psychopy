@@ -11,6 +11,7 @@ from .. import Computer, Device
 
 #>>>>>>>>>>>>>>>>>>>>>>>>
 
+import sys
 import ctypes
 import ctypes.util
 import CoreFoundation
@@ -49,7 +50,8 @@ carbon = ctypes.cdll.LoadLibrary(carbon_path)
 
 
 def objcify(ptr):
-    return _objc.PyObjCObject_New(ptr, 0, 1)
+    return objc.objc_object(c_void_p=ptr)
+
 
 kTISPropertyUnicodeKeyLayoutData_p = ctypes.c_void_p.in_dll(
     carbon, 'kTISPropertyUnicodeKeyLayoutData')
@@ -122,7 +124,7 @@ class Keyboard(ioHubKeyboardDevice):
     """Keyboard device class for iohub on Mac OS X using Quartz.
     
     This class uses the Quartz API to monitor keyboard events on Mac OS X.    
-
+    
     """
     _last_mod_names = []
     _OS_MODIFIERS = ([(0x00001, 'lctrl'), (0x02000, 'rctrl'),
