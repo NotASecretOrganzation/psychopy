@@ -139,7 +139,13 @@ class BaseParamCtrl(wx.Panel):
         # set on ctrl if possible
         if hasattr(self.ctrl, 'SetToolTip'):
             self.ctrl.SetToolTip(wx.ToolTip(text))
-        
+    
+    def getWarning(self):
+        """
+        Get the warning associated with this ctrl, if any
+        """
+        if self.warnings is not None:
+            return self.warnings.getWarning(self)
 
     def setWarning(self, warning, allowed=True):
         """
