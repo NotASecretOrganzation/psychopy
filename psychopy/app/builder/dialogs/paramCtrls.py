@@ -589,7 +589,7 @@ class ChoiceCtrl(BaseParamCtrl):
     def setValue(self, value):
         if str(value) not in self.choices:
             # if not known, add it to possible choices
-            self.choices.append(value)
+            self.choices.append(str(value))
             self.labels.append(str(value))
             self.ctrl.SetItems(self.labels)
         # set
