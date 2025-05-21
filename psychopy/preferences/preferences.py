@@ -72,7 +72,7 @@ class Preferences:
         self.paths = {}  # this will remain a dictionary
         self.keys = {}  # does not remain a dictionary
 
-        self.getPaths()
+        # Only call loadAll, which will handle getPaths
         self.loadAll()
         # setting locale is now handled in psychopy.localization.init
         # as called upon import by the app
@@ -102,7 +102,7 @@ class Preferences:
             print(msg % userCfg)
         self.loadAll()  # reloads, now getting all from .spec
 
-    def getPaths(self):
+    def getPaths(self, userDir=None):
         """Get the paths to various directories and files used by PsychoPy.
 
         If the paths are not found, they are created. Usually, this is only
@@ -141,16 +141,25 @@ class Preferences:
             # if there isn't an app folder at all then this is a lib-only psychopy
             # so don't try to load app prefs etc
             NO_APP = True
+        # get user dir
+        if userDir is not None and os.path.isdir(userDir):
+            self.paths['userPrefsDir'] = join(
+                userDir, '.psychopy3'
+            )
+        elif sys.platform == 'win32':
+            self.paths['userPrefsDir'] = join(
+                os.environ['APPDATA'], 'psychopy3'
+            )
+        else:
+            self.paths['userPrefsDir'] = join(
+                os.environ['HOME'], '.psychopy3'
+            )
+        # get system-appropriate spec file
         if sys.platform == 'win32':
             self.paths['prefsSpecFile'] = join(prefSpecDir, 'Windows.spec')
-            self.paths['userPrefsDir'] = join(os.environ['APPDATA'],
-                                              'psychopy3')
         else:
-            self.paths['prefsSpecFile'] = join(prefSpecDir,
-                                               platform.system() + '.spec')
-            self.paths['userPrefsDir'] = join(os.environ['HOME'],
-                                              '.psychopy3')
-
+            self.paths['prefsSpecFile'] = join(
+                prefSpecDir, platform.system() + '.spec')
         # directory for files created by the app at runtime needed for operation
         self.paths['userCacheDir'] = join(self.paths['userPrefsDir'], 'cache')
 
@@ -273,9 +282,10 @@ class Preferences:
                     Path(self.paths['themes']) / file.name
                 )
 
-    def loadAll(self):
+    def loadAll(self, userDir=None):
         """Load the user prefs and the application data
         """
+        self.getPaths(userDir=userDir)
         self._validator = validate.Validator()
 
         # note: self.paths['userPrefsDir'] gets set in loadSitePrefs()
