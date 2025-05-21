@@ -346,6 +346,9 @@ class MicrophoneSoundSensor(BaseSoundSensorGroup):
             self.getThreshold(channel=channel) * (max(self.dbRange) - min(self.dbRange))
         )
     
+    def getCurrentVolume(self):
+        return self.device.getCurrentVolume()
+    
     def _setThreshold(self, threshold, channel=None):
         """
         No additional setup is needed for emulator as thresholding is emulated outside of the 
