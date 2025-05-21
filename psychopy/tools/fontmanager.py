@@ -665,12 +665,16 @@ def findFontFiles(folders=(), recursive=True):
     # make sure font paths is a list
     if isinstance(searchPaths, tuple):
         searchPaths = list(searchPaths)
-    # always look in the local directory, unless it's inside PsychoPy itself
+    # look in the local directory, unless it's one of the following...
     thisDir = Path(".").absolute()
-    if all((
-        thisDir not in Path(prefs.paths['psychopy']).parents,
-        thisDir != Path(prefs.paths['psychopy']),
-        Path(prefs.paths['psychopy']) not in thisDir.parents,
+    if not any((
+        # directory is within psychopy
+        thisDir in Path(prefs.paths['psychopy']).parents,
+        thisDir == Path(prefs.paths['psychopy']),
+        # psychopy is within directory
+        Path(prefs.paths['psychopy']) in thisDir.parents,
+        # directory is the home directory
+        thisDir == Path.home(),
     )):
         searchPaths.append(thisDir)
     # always look inside the app
