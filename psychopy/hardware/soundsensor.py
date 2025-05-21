@@ -367,7 +367,7 @@ class MicrophoneSoundSensor(BaseSoundSensorGroup):
             vol = max(vol)
         # transform volume to arbitrary units
         adjVol = int(
-            (vol - min(self.dbRange)) / (max(self.dbRange) - min(self.dbRange)) * 255
+            (vol - min(self.dbRange)) / (max(self.dbRange) - min(self.dbRange))
         )
         # iterate through channels
         for channel in range(self.channels):

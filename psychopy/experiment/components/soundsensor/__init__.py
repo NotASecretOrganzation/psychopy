@@ -324,7 +324,7 @@ class MicrophoneSoundSensorBackend(DeviceBackend):
             label=_translate("Decibel range"),
             hint=_translate(
                 "What kind of values (dB) would you expect to receive from this device? In other "
-                "words, how many dB does a threshold of 0 and of 255 correspond to?"
+                "words, how many dB does a threshold of 0 and 1 correspond to?"
             )
         )
         params['meSamplingWindow'] = Param(
