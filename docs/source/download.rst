@@ -33,17 +33,17 @@ Download
 
         Hot off the presses, this is the latest release with all the newest features. If you're fine with a few bugs so long as you get the cutting edge features as soon as they're ready, this is the install for you.
 
-        .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.0/StandalonePsychoPy-2025.1.0-win-py3.10.exe
+        .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.1/StandalonePsychoPy-2025.1.1-win64-py3.10.exe
           :color: primary
 
-          PsychoPy 2025.1.0beta (py3.10)
+          PsychoPy 2025.1.1beta (py3.10)
         
         .. dropdown:: Compatibility+ installer (py3.8)
 
-          .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.0/StandalonePsychoPy-2025.1.0-win-py3.8.exe
+          .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.1/StandalonePsychoPy-2025.1.1-win64-py3.8.exe
             :color: primary
 
-            PsychoPy 2025.1.0 compatibility+ (py3.8)
+            PsychoPy 2025.1.1beta compatibility+ (py3.8)
   
   .. tab-item:: MacOS
 
@@ -70,17 +70,17 @@ Download
 
         Hot off the presses, this is the latest release with all the newest features. If you're fine with a few bugs so long as you get the cutting edge features as soon as they're ready, this is the install for you.
 
-        .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.0/StandalonePsychoPy-2025.1.0-macOS-py3.10.dmg
+        .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.1/StandalonePsychoPy-2025.1.1-macOS-py3.10.dmg
           :color: primary
 
-          PsychoPy 2025.1.0beta (py3.10)
+          PsychoPy 2025.1.1beta (py3.10)
         
         .. dropdown:: Compatibility+ installer (py3.8)
 
-          .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.0/StandalonePsychoPy-2025.1.0-macOS-py3.8.dmg
+          .. button-link:: https://github.com/psychopy/psychopy/releases/download/2025.1.1/StandalonePsychoPy-2025.1.1-macOS-py3.8.dmg
             :color: primary
 
-            PsychoPy 2025.1.0 compatibility+ (py3.8)
+            PsychoPy 2025.1.1beta compatibility+ (py3.8)
   
   .. tab-item:: Linux
 
