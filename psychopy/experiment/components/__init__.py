@@ -25,8 +25,6 @@ excludeComponents = [
     'BaseComponent',
     'BaseVisualComponent',
     'BaseDeviceComponent',
-    'BaseStandaloneRoutine',
-    'BaseDeviceRoutine',  # templates only
 ]  # this one isn't ready yet
 
 # Plugin components are added dynamically at runtime, usually from plugin

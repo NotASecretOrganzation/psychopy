@@ -77,7 +77,11 @@ from psychopy.scripts.psyexpCompile import generateScript
 
 # Components which are always hidden
 alwaysHidden = [
-    'BaseComponent', 'BaseStandaloneRoutine', 'BaseValidatorRoutine'
+    'BaseComponent', 
+    'BaseDeviceComponent',
+    'BaseStandaloneRoutine', 
+    'BaseDeviceRoutine',
+    'BaseValidatorRoutine',
 ]
 
 
