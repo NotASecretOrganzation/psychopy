@@ -178,7 +178,7 @@ class CameraComponent(BaseDeviceComponent):
         if self.params['saveFile']:
             code = (
                 "# connect camera save method to experiment handler so it's called when data saves\n"
-                "thisExp.connectSaveMethod(%(name)s.save, os.path.join(%(name)sRecFolder, '_recovered.mp4'), encoderLib='ffpyplayer')\n"
+                "thisExp.connectSaveMethod(%(name)s.save, os.path.join(%(name)sRecFolder, '_recovered.mp4'))\n"
             )
             buff.writeIndentedLines(code % inits)
 
