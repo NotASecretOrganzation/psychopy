@@ -148,6 +148,10 @@ class AddDeviceDlg(wx.Dialog):
         self.devicesLoadingLbl.Hide()
         self.devicesCtrl.Show()
         self.Layout()
+    
+    def __del__(self):
+        # imageList has to be deleted manually due to garbage collection bug in TreeCtrl
+        del self.imageList
 
     def populateAsync(self, evt):
         """
