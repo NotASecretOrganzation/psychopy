@@ -134,35 +134,43 @@ class BuilderFrame(BaseAuiFrame, handlers.ThemeMixin):
         # default window title
         self.winTitle = 'PsychoPy Builder (v{})'.format(self.app.version)
 
+        # get last frame information, or default
         if fileName in self.appData['frames']:
             self.frameData = self.appData['frames'][fileName]
-        else:  # work out a new frame size/location
-            dispW, dispH = self.app.getPrimaryDisplaySize()
-            default = self.appData['defaultFrame']
-            default['winW'] = int(dispW * 0.75)
-            default['winH'] = int(dispH * 0.75)
-            if default['winX'] + default['winW'] > dispW:
-                default['winX'] = 5
-            if default['winY'] + default['winH'] > dispH:
-                default['winY'] = 5
-            self.frameData = dict(self.appData['defaultFrame'])  # copy
+        else:
+            self.frameData = dict(self.appData['defaultFrame'])
+            # work out best default size from screen size
+            i = wx.Display.GetFromPoint(wx.Point(
+                int(self.frameData['winX']), int(self.frameData['winY'])
+            ))
+            try:
+                disp = wx.Display(max(i, 0))
+            except:
+                disp = wx.Display(0)
+            dispW, dispH = list(disp.GetGeometry())[2:]
+            # set in frameData array
+            self.frameData['winW'] = dispW * 0.75
+            self.frameData['winH'] = dispH * 0.75
             # increment default for next frame
-            default['winX'] += 10
-            default['winY'] += 10
-
-        # we didn't have the key or the win was minimized / invalid
-        if self.frameData['winH'] == 0 or self.frameData['winW'] == 0:
-            self.frameData['winX'], self.frameData['winY'] = (0, 0)
-        if self.frameData['winY'] < 20:
-            self.frameData['winY'] = 20
-
-        BaseAuiFrame.__init__(self, parent=parent, id=id, title=title,
-                              pos=(int(self.frameData['winX']),
-                                   int(self.frameData['winY'])),
-                              size=(int(self.frameData['winW']),
-                                    int(self.frameData['winH'])),
-                              style=style)
-
+            self.frameData['winX'] += 10
+            self.frameData['winY'] += 10
+        # handle when last open frame was minimised or invalid
+        for key in ("winH", "winW", "winX", "winY"):
+            self.frameData[key] = max(self.frameData[key], 20)
+        # initialise
+        BaseAuiFrame.__init__(
+            self, 
+            parent=parent, 
+            id=id, 
+            size=(
+                int(self.frameData['winW']), int(self.frameData['winH'])
+            ),
+            pos=(
+                int(self.frameData['winX']), int(self.frameData['winY'])
+            ),
+            title=title,
+            style=style
+        )
         # detect retina displays (then don't use double-buffering)
         self.isRetina = \
             self.GetContentScaleFactor() != 1 and wx.Platform == '__WXMAC__'
