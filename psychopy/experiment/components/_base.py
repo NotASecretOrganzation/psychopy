@@ -1381,6 +1381,8 @@ class BaseDeviceComponent(BaseComponent, DeviceMixin):
     """
     Base class for most components which interface with a hardware device.
     """
+    # params which once belonged to the Component but are now handled by a DeviceBackend
+    legacyDeviceParams = []
 
     def __init__(
             self, exp, parentName,
