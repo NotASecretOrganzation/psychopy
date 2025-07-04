@@ -1667,7 +1667,7 @@ class DeviceCtrl(ChoiceCtrl):
         # get the device manager
         from psychopy.preferences import prefs
         # if not setup, ask the user whether they want to set it up
-        if self.getValue() not in prefs.devices:
+        if self.getValue() and self.getValue() not in prefs.devices:
             # create dialog
             dlg = wx.MessageDialog(
                 self.GetTopLevelParent(),
