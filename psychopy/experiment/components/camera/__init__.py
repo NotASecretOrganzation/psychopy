@@ -333,7 +333,7 @@ class CameraDeviceBackend(DeviceBackend):
         resolutions = set()
         frameRates = set()
         for profile in CameraDevice.getAvailableDevices(best=False):
-            if profile['device'] == self.profile['device']:
+            if profile['deviceName'] == self.profile['deviceName']:
                 resolutions.add(profile['frameSize'])
                 frameRates.add(profile['frameRate'])
         
