@@ -1394,39 +1394,40 @@ class Camera:
                     self._capture = DeviceManager.addDevice(**profile)
                     break
         elif isinstance(device, str):
-            # get available devices
-            availableDevices = CameraDevice.getAvailableDevices()
-            # if given a device name, try to find it
-            for profile in availableDevices:
-                if profile['deviceName'] != device:
-                    continue
-                paramsMatch = all([
-                    profile.get(key) == value
-                    for key, value in {
-                        'deviceName': device,
-                        'captureLib': cameraLib,
-                        'frameRate': frameRate if frameRate is not None else True,  # get first
-                        'frameSize': frameSize if frameSize is not None else True
-                    }.items() if value is not None
-                ])
-                if not paramsMatch:
-                    continue
-                
-                device = profile['device']
+            if DeviceManager.getDevice(device):
                 self._capture = DeviceManager.getDevice(device)
-                break
+            else:
+                # get available devices
+                availableDevices = CameraDevice.getAvailableDevices()
+                # if given a device name, try to find it
+                for profile in availableDevices:
+                    if profile['deviceName'] != device:
+                        continue
+                    paramsMatch = all([
+                        profile.get(key) == value
+                        for key, value in {
+                            'deviceName': device,
+                            'captureLib': cameraLib,
+                            'frameRate': frameRate if frameRate is not None else True,  # get first
+                            'frameSize': frameSize if frameSize is not None else True
+                        }.items() if value is not None
+                    ])
+                    if not paramsMatch:
+                        continue
+                    
+                    device = profile['device']
+                    break
 
-            # anything else, try to initialise a new device from params
-            self._capture = CameraDevice(
-                device=device,
-                captureLib=cameraLib,
-                frameRate=frameRate,
-                frameSize=frameSize,
-                pixelFormat=None,  # use default pixel format
-                codecFormat=None,  # use default codec format
-                captureAPI=None  # use default capture API
-            )
-
+                # anything else, try to initialise a new device from params
+                self._capture = CameraDevice(
+                    device=device,
+                    captureLib=cameraLib,
+                    frameRate=frameRate,
+                    frameSize=frameSize,
+                    pixelFormat=None,  # use default pixel format
+                    codecFormat=None,  # use default codec format
+                    captureAPI=None  # use default capture API
+                )
         else:
             # anything else, try to initialise a new device from params
             self._capture = CameraDevice(
