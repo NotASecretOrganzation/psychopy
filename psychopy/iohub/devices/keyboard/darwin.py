@@ -124,7 +124,7 @@ class Keyboard(ioHubKeyboardDevice):
     """Keyboard device class for iohub on Mac OS X using Quartz.
     
     This class uses the Quartz API to monitor keyboard events on Mac OS X.    
-    
+
     """
     _last_mod_names = []
     _OS_MODIFIERS = ([(0x00001, 'lctrl'), (0x02000, 'rctrl'),
