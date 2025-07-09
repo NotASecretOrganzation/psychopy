@@ -547,15 +547,18 @@ class CameraDevice(BaseDevice):
         
         # store device info
         profile = self.getDeviceProfile()
-        self.info = CameraInfo(
-            name=profile['deviceName'],
-            frameSize=profile['frameSize'],
-            frameRate=profile['frameRate'],
-            pixelFormat=profile['pixelFormat'],
-            codecFormat=profile['codecFormat'],
-            cameraLib=profile['captureLib'],
-            cameraAPI=profile['captureAPI']
-        )
+        if profile:
+            self.info = CameraInfo(
+                name=profile['deviceName'],
+                frameSize=profile['frameSize'],
+                frameRate=profile['frameRate'],
+                pixelFormat=profile['pixelFormat'],
+                codecFormat=profile['codecFormat'],
+                cameraLib=profile['captureLib'],
+                cameraAPI=profile['captureAPI']
+            )
+        else:
+            self.info = CameraInfo()
 
     def isSameDevice(self, other):
         """
