@@ -173,6 +173,7 @@ class CameraComponent(BaseDeviceComponent):
         # if specified, get camera from device manager
         code = (
             "%(name)s = camera.Camera(\n"
+            "    win=win,\n"
             "    device=%(deviceLabel)s,\n"
             "    mic=%(micDeviceLabel)s,\n"
             ")"
