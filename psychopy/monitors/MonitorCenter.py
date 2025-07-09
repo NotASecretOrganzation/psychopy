@@ -779,7 +779,7 @@ class MainFrame(wx.Frame):
         win = Window(
             screen=int(params['screen']), 
             checkTiming=False,
-            fullscr=False
+            fullscr=True
         )
         # setup calibration procedure device
         device = None
