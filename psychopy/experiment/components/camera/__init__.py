@@ -265,7 +265,7 @@ class CameraComponent(BaseDeviceComponent):
             "    %(name)sRecFolder, \n"
             "    'recording_%(name)s_%%s.mp4' %% data.utils.getDateStr()\n"
             ")\n"
-            "%(name)s.save(%(name)sFilename, encoderLib='ffpyplayer')\n"
+            "%(name)s.save(%(name)sFilename)\n"
             "thisExp.currentLoop.addData('%(name)s.clip', %(name)sFilename)\n"
             )
             buff.writeIndentedLines(code % self.params)
