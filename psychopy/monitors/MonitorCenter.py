@@ -789,11 +789,12 @@ class MainFrame(wx.Frame):
             break
         # catch error if no device found
         if device is None:
-            wx.MessageBox(
-                "No device found of class: '{photometer}'".format(params), 
-                style=wx.ICON_ERROR | wx.OK
-            ).ShowModal()
             win.close()
+            wx.MessageBox(
+                "Could not find any device matching '{photometer}', aborting calibration.".format(**params), 
+                parent=self,
+                style=wx.ICON_ERROR | wx.OK
+            )
             return
         
         # run calibration
