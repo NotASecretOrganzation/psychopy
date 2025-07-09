@@ -2040,6 +2040,8 @@ class Camera:
                     self._absAudioActualRecStartTime = self._absAudioRecStartTime
 
         self._isRecording = True  # set recording flag
+        # do an initial poll to avoid frame dropping
+        self.update()
 
     def start(self, waitForStart=True):
         """Start the camera stream.
