@@ -48,7 +48,7 @@ def calibrateGamma(
     patch = visual.GratingStim(
         win,
         tex="sqr",
-        size=(patchSize, patchSize),
+        size=(patchSize*2, patchSize*2),
         units="norm",
         rgb=(255, 255, 255),
         colorSpace="rgb255",
