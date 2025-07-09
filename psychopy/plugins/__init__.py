@@ -789,10 +789,10 @@ def loadPlugin(plugin):
                 f"Registering entry point {ep.value} (from {plugin}) to {ep.group}:{ep.name}"
             )
             try:
-                ep = ep.load()  # load the entry point
+                mod = ep.load()  # load the entry point
 
                 # Raise a warning if the plugin is being loaded from a zip file.
-                if '.zip' in inspect.getfile(ep):
+                if '.zip' in inspect.getfile(mod):
                     logging.warning(
                         "Plugin `{}` is being loaded from a zip file. This may "
                         "cause issues with the plugin's functionality.".format(plugin))
@@ -811,6 +811,8 @@ def loadPlugin(plugin):
                     _failed_plugins_.append(plugin)
 
                 continue
+            else:
+                ep = mod
 
             # If we get here, the entry point is valid and we can safely add it
             # to PsychoPy's namespace.
