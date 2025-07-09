@@ -1953,6 +1953,10 @@ class Camera:
         if self.win is not None:
             # if we have a window, setup texture buffers for displaying
             self._setupTextureBuffers()
+        
+        # open the mic when the camera opens
+        if hasattr(self.mic, "open"):
+            self.mic.open()
 
         self._isStarted = True
 
