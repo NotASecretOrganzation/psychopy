@@ -547,15 +547,18 @@ class CameraDevice(BaseDevice):
         
         # store device info
         profile = self.getDeviceProfile()
-        self.info = CameraInfo(
-            name=profile['deviceName'],
-            frameSize=profile['frameSize'],
-            frameRate=profile['frameRate'],
-            pixelFormat=profile['pixelFormat'],
-            codecFormat=profile['codecFormat'],
-            cameraLib=profile['captureLib'],
-            cameraAPI=profile['captureAPI']
-        )
+        if profile:
+            self.info = CameraInfo(
+                name=profile['deviceName'],
+                frameSize=profile['frameSize'],
+                frameRate=profile['frameRate'],
+                pixelFormat=profile['pixelFormat'],
+                codecFormat=profile['codecFormat'],
+                cameraLib=profile['captureLib'],
+                cameraAPI=profile['captureAPI']
+            )
+        else:
+            self.info = CameraInfo()
 
     def isSameDevice(self, other):
         """
@@ -1950,6 +1953,10 @@ class Camera:
         if self.win is not None:
             # if we have a window, setup texture buffers for displaying
             self._setupTextureBuffers()
+        
+        # open the mic when the camera opens
+        if hasattr(self.mic, "open"):
+            self.mic.open()
 
         self._isStarted = True
 
@@ -2033,6 +2040,8 @@ class Camera:
                     self._absAudioActualRecStartTime = self._absAudioRecStartTime
 
         self._isRecording = True  # set recording flag
+        # do an initial poll to avoid frame dropping
+        self.update()
 
     def start(self, waitForStart=True):
         """Start the camera stream.
