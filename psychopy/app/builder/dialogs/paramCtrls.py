@@ -1067,13 +1067,13 @@ class FontCtrl(SingleLineCtrl):
             # download if yes
             if dlg.ShowModal() == wx.ID_YES:
                 try:
-                    fm.addGoogleFont(self.GetValue().strip())
+                    fm.addGoogleFont(self.getValue().strip())
                 except MissingFontError as err:
                     dlg = wx.MessageDialog(
                         self.GetTopLevelParent(),
                         _translate(
                             "Could not download font {} from Google Fonts, reason: {}"
-                        ).format(self.GetValue(), err),
+                        ).format(self.getValue(), err),
                         style=wx.OK|wx.ICON_ERROR
                     )
                     dlg.ShowModal()
