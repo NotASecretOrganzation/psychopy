@@ -155,19 +155,23 @@ def findPhotometer(ports=None, device=None):
 
     """
     from .photometer import getAllPhotometerClasses
-    # get all available devices
-    for cls, profiles in DeviceManager.getAvailableDevices(
-        getAllPhotometerClasses()
-    ).items():
-        # iterate through each
-        for profile in profiles:
-            # if port matches, or device matches and no port given, initialise from this profile
-            if (
-                ports is None and device == cls.__name__
-            ) or (
-                ports and profile.get('port', None) in ports
-            ):
-                return DeviceManager.addDevice(**profile)
+    # try each port
+    if isinstance(ports, str) or ports is None:
+        ports = [ports]
+    for port in ports:
+        # get all available devices
+        for cls, profiles in DeviceManager.getAvailableDevices(
+            list(getAllPhotometerClasses().values())
+        ).items():
+            # iterate through each
+            for profile in profiles:
+                # if port matches, or device matches and no port given, initialise from this profile
+                if (
+                    port is None and device == cls.__name__
+                ) or (
+                    port and "port" in profile and profile['port'] in port
+                ):
+                    return DeviceManager.addDevice(**profile)
 
 
 if __name__ == "__main__":
