@@ -37,6 +37,7 @@ inputTypes = {}
 
 
 EVT_PARAM_CHANGED = wx.PyEventBinder(wx.IdManager.ReserveId())
+emptyNamespace = NameSpace(experiment.Experiment())
 
 
 class ParamValueChangedEvent(wx.CommandEvent):
@@ -88,6 +89,11 @@ class BaseParamCtrl(wx.Panel):
         self.param = param.copy()
         self.element = element
         self.warnings = warnings
+        # setup namespace
+        if hasattr(element, "exp"):
+            self.namespace = self.element.exp.namespace
+        else:
+            self.namespace = emptyNamespace
         # setup sizer
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.SetSizer(self.sizer)
@@ -338,7 +344,7 @@ class SingleLineCtrl(BaseParamCtrl):
                 # iterate through variable defs in code (if any)
                 for name in variableDefs:
                     # is it overwriting something?
-                    used = self.element.exp.namespace.exists(name)
+                    used = self.namespace.exists(name)
                     if used:
                         # warn but allow
                         self.setWarning(_translate(
@@ -430,7 +436,7 @@ class NameCtrl(SingleLineCtrl):
                 if self.getValue() == self.element.name:
                     return
                 # otherwise, check against extant names
-                exists = self.element.exp.namespace.exists(self.getValue())
+                exists = self.namespace.exists(self.getValue())
                 if exists:
                     self.setWarning(_translate(
                         "Name is already in use ({})"
@@ -1043,7 +1049,11 @@ class FontCtrl(SingleLineCtrl):
         from psychopy.tools.fontmanager import FontManager, MissingFontError
         fm = FontManager()
         # check whether the font is installed
-        installed = fm.getFontsMatching(self.getValue(), fallback=False)
+        if self.element and hasattr(self.element, "exp") and self.element.exp.filename:
+            currentDir = Path(self.element.exp.filename).parent
+        else:
+            currentDir = Path(".")
+        installed = fm.getFontsMatching(self.getValue(), fallback=False, currentDir=currentDir)
         # if not installed, ask the user whether to download from Google Fonts
         if not installed:
             # create dialog
@@ -1458,6 +1468,27 @@ class DictCtrl(BaseParamCtrl):
             self.parent.onChange(evt)
     
     class DictValue(SingleLineCtrl):
+        def validate(self):
+            # update param label so the error reports the value of keyctrl
+            if hasattr(self, "keyCtrl"):
+                self.param.label = f"{self.parent.param.label}:{self.keyCtrl.getValue()}"
+
+            # validate first as code
+            self.param.valType = "code"
+            self.dollarLbl.Show()
+            self.warnings.clearWarning(self)
+            self.validateCode()
+            # if this failed, try as string
+            if self.warnings.getWarning(self):
+                self.warnings.clearWarning(self)
+                self.param.valType = "str"
+                self.validateStr()
+            
+            self.dollarLbl.Show(self.param.valType == "code")
+            
+            self.Refresh()
+            self.Layout()
+
         def onChange(self, evt=None):
             SingleLineCtrl.onChange(self, evt)
             self.parent.onChange(evt)
@@ -1482,6 +1513,7 @@ class DictCtrl(BaseParamCtrl):
                 element=parent.element,
                 warnings=parent.warnings
             )
+            self.valueCtrl.keyCtrl = self.keyCtrl
             # add delete button
             self.deleteBtn = wx.Button(parent, style=wx.BU_EXACTFIT)
             self.deleteBtn.SetBitmap(
@@ -1637,3 +1669,31 @@ class DeviceCtrl(ChoiceCtrl):
         dlg.ShowModal()
         # repopulate devices
         self.populate()
+        # also repopulate sibling controls
+        for sibling in self.GetParent().GetChildren():
+            if isinstance(sibling, DeviceCtrl) and sibling is not self:
+                sibling.populate()
+    
+    def onElementOk(self, evt=None):
+        # get the device manager
+        from psychopy.preferences import prefs
+        from psychopy.app.deviceManager import AddDeviceDlg
+        # if not setup, ask the user whether they want to set it up
+        if self.getValue() and self.getValue() not in prefs.devices:
+            # create dialog
+            dlg = wx.MessageDialog(
+                self.GetTopLevelParent(),
+                _translate(
+                    "No device named `{}` has been setup in the Device Manager, set one up now?"
+                ).format(self.getValue()),
+                style=wx.YES|wx.NO|wx.ICON_QUESTION
+            )
+            # open device manager if yes
+            if dlg.ShowModal() == wx.ID_YES:
+                dlg = AddDeviceDlg(self, deviceName=self.getValue())
+                # on OK, add device and refresh list
+                if dlg.ShowModal() == wx.ID_OK:
+                    device = dlg.getDevice()
+                    prefs.devices[device.name] = device
+                    prefs.devices.save()
+                    self.populate()

@@ -47,7 +47,7 @@ class DeviceMixin:
             return [device[0] for device in getDevices()]
         # label to refer to device by
         self.params['deviceLabel'] = Param(
-            defaultLabel, valType="str", inputType="device", categ="Device",
+            defaultLabel, valType="device", inputType="device", categ="Device",
             allowedVals=getValues,
             allowedLabels=getLabels,
             label=_translate("Device"),
@@ -240,13 +240,21 @@ class DeviceBackend:
             List of backend classes
         """
         from psychopy.experiment import getAllElements
+        from psychopy.experiment.monitor import BasePhotometerDeviceBackend, ScreenBufferPhotometerDeviceBackend
         allBackends = []
+        # look for device backends associated with all known Components and Routines
         for emt in getAllElements(fetchIcons=False).values():
             if hasattr(emt, "backends"):
                 for backend in emt.backends:
+                    # check that each backend is a DeviceBackend
                     if issubclass(backend, DeviceBackend) and backend not in allBackends:
+                        # append if so
                         allBackends.append(backend)
-        
+        # add subclasses of BasePhotometerBackend as it doesn't come from any Component
+        for cls in BasePhotometerDeviceBackend.__subclasses__():
+            if cls not in allBackends:
+                allBackends.append(cls)
+
         return allBackends
         
     
@@ -273,7 +281,7 @@ class DeviceBackend:
         code = ""
         for key, value in self.profile.items():
             # skip attributes already covered by a param
-            if key in ("deviceName",):
+            if key in self.params or key in ("deviceName", ):
                 continue
             code += f"    {key}={repr(value)},\n"
         buff.writeIndentedLines(code)

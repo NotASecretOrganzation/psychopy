@@ -5,9 +5,10 @@ from pathlib import Path
 from psychopy.preferences import prefs
 from psychopy.alerts._alerts import alert
 from psychopy.experiment import Param
-from psychopy.experiment.plugins import PluginDevicesMixin, DeviceBackend
+from psychopy.experiment.plugins import PluginDevicesMixin
 from psychopy.experiment.components import getInitVals
 from psychopy.experiment.routines import Routine, BaseValidatorRoutine
+from psychopy.experiment.devices import DeviceBackend
 from psychopy.localization import _translate
 
 
@@ -24,6 +25,10 @@ class VisualValidatorRoutine(BaseValidatorRoutine, PluginDevicesMixin):
     )
     deviceClasses = []
     version = "2025.1.0"
+    legacyParams = [
+        # old device setup params, no longer needed as this is handled by DeviceManager
+        "deviceBackend"
+    ]
 
     def __init__(
             self,
@@ -359,10 +364,9 @@ class ScreenBufferVisualValidatorBackend(DeviceBackend):
     example for implementing other light sensor device backends.
     """
 
-    key = "screenbuffer"
-    label = _translate("Screen Buffer (Debug)")
-    component = VisualValidatorRoutine
-    deviceClasses = ["psychopy.hardware.lightsensor.ScreenBufferSampler"]
+    backendLabel = "Screen Buffer Sampler (Debug)"
+    deviceClass = "psychopy.hardware.lightsensor.ScreenBufferSampler"
+    icon = "light/visual_validator.png"
 
     def getParams(self: VisualValidatorRoutine):
         # define order
@@ -389,3 +393,7 @@ class ScreenBufferVisualValidatorBackend(DeviceBackend):
             ")\n"
         )
         buff.writeOnceIndentedLines(code % inits)
+
+
+# register backend with Component
+VisualValidatorRoutine.registerBackend(ScreenBufferVisualValidatorBackend)

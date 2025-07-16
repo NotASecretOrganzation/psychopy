@@ -1,3 +1,4 @@
+from psychopy.app.deviceManager.utils import DeviceImageList
 from psychopy.app.builder.dialogs.paramCtrls import EVT_PARAM_CHANGED, ParamCtrl
 from psychopy.app.builder.validators import WarningManager
 from psychopy.app.themes import fonts, icons
@@ -15,7 +16,7 @@ class AddDeviceDlg(wx.Dialog):
 
     availableDevices = None
 
-    def __init__(self, parent):
+    def __init__(self, parent, deviceName=""):
         wx.Dialog.__init__(
             self, parent, title="Add device",
             size=(540, 540),
@@ -34,8 +35,12 @@ class AddDeviceDlg(wx.Dialog):
             self.sizer, proportion=1, border=12, flag=wx.EXPAND | wx.ALL
         )
         # name ctrl
+        self.nameLbl = wx.StaticText(self, label=_translate("Device name"))
+        self.sizer.Add(
+            self.nameLbl, border=6, flag=wx.EXPAND | wx.TOP
+        )
         self.name = Param(
-            "device", valType="str", inputType="name",
+            deviceName, valType="str", inputType="name",
             label=_translate("Device label"),
             hint=_translate(
                 "A name to refer to this device by in Device Manager."
@@ -67,6 +72,9 @@ class AddDeviceDlg(wx.Dialog):
             self,
             style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_NO_LINES
         )
+        self.imageList = DeviceImageList(width=24, height=24)
+        self.devicesCtrl.SetImageList(self.imageList)
+        self.devicesCtrl.SetIndent(6)
         self.sizer.Add(
             self.devicesCtrl, proportion=1, border=6, flag=wx.EXPAND | wx.BOTTOM
         )
@@ -124,8 +132,6 @@ class AddDeviceDlg(wx.Dialog):
         # clear ctrl
         self.devicesCtrl.DeleteAllItems()
         self.branchClasses = {}
-        self.imageList = wx.ImageList(width=16, height=16)
-        self.devicesCtrl.SetImageList(self.imageList)
         # add a root
         root = self.devicesCtrl.AddRoot("Available devices")
         # iterate through classes...
@@ -133,17 +139,13 @@ class AddDeviceDlg(wx.Dialog):
             # don't add label if there's no profiles
             if len(profiles) == 0:
                 continue
-            # add icon if possible
-            if cls.icon is not None:
-                bmp = icons.BaseIcon.resizeBitmap(
-                    wx.Bitmap(str(cls.getIconFile())),
-                    size=16
-                )
-                img = self.imageList.Add(bmp)
-            else:
-                img = -1
             # add a child for each class
-            branch = self.devicesCtrl.AppendItem(root, cls.backendLabel, image=img)
+            branch = self.devicesCtrl.AppendItem(
+                root, 
+                cls.backendLabel or cls.__name__, 
+                image=self.imageList.getIcon(cls) or -1
+            )
+            self.devicesCtrl.SetItemBold(branch)
             # store ref to branch class
             self.branchClasses[branch] = cls
             # iterate through profiles...
@@ -154,6 +156,10 @@ class AddDeviceDlg(wx.Dialog):
         self.devicesLoadingLbl.Hide()
         self.devicesCtrl.Show()
         self.Layout()
+    
+    def __del__(self):
+        # imageList has to be deleted manually due to garbage collection bug in TreeCtrl
+        del self.imageList
 
     def populateAsync(self, evt):
         """
