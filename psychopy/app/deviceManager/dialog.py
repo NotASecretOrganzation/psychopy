@@ -37,7 +37,10 @@ class DeviceManagerDlg(wx.Dialog):
         # resize the list ctrl
         self.profilesListCtrl = self.profilesNotebook.GetListView()
         self.profilesListCtrl.SetWindowStyleFlag(wx.LC_LIST)
-        self.profilesListCtrl.SetColumnWidth(-1, 128)
+
+        if wx.Platform == "__WXMSW__":
+            self.profilesListCtrl.SetColumnWidth(-1, 128)
+            
         self.profilesListCtrl.SetMinSize((128, 128))
         self.profilesListCtrl.Refresh()
         # apply cached devices image list
