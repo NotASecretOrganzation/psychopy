@@ -1054,7 +1054,8 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         self._filename = pathToString(filename)
         self._volume = volume
         self._noAudio = noAudio  # cannot be changed
-        self.loop = loop
+        self._loop = loop
+        self._loopCount = 0  # number of times the movie has looped
         self._recentFrame = None
         self._autoStart = autoStart
         self._isLoaded = False
@@ -1162,6 +1163,36 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         """Frame rate of the movie in Hertz (`float`).
         """
         return self._player.metadata.frameRate
+    
+    @property
+    def loop(self):
+        """Whether the movie will loop when it reaches the end (`bool`).
+        
+        If `True`, the movie will start over from the beginning when it reaches
+        the end. If `False`, the movie will stop at the end.
+        
+        """
+        return self._loop
+    
+    @loop.setter
+    def loop(self, value):
+        """Set whether the movie will loop when it reaches the end.
+        
+        Parameters
+        ----------
+        value : bool
+            If `True`, the movie will loop when it reaches the end. If `False`,
+            the movie will stop at the end.
+        
+        """
+        self._loop = bool(value)
+
+    @property
+    def loopCount(self):
+        """Number of times the movie has looped (`int`).
+
+        """
+        return self._player.loopCount if self._hasPlayer else 0
 
     @property
     def _hasPlayer(self):
@@ -1238,6 +1269,13 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
             disableAudio = True
 
         self._decoderOpts['an'] = disableAudio  
+
+        # Setup looping if the user has requested it. This is done by setting the
+        # `loop` option in the decoder options so FFMPEG will loop the movie 
+        # automatically when it reaches the end. The loop count is reset to 0.
+
+        self._decoderOpts['loop'] = 0 if self._loop else 1
+        self._loopCount = 0  # reset loop count
 
         # Create the movie player interface, this is what decodes movie frames
         # in the background. We disable audio playback since we are using the
@@ -1389,9 +1427,21 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         #     return
 
         if self._playbackStatus == PLAYING:
-            # determine the current movie time
-            self._movieTime = min(
-                self._movieTime + (now - self._lastFrameAbsTime), self.duration)
+            # check if were at the end of the movie
+            if self._movieTime < self.duration:
+                # determine the current movie time
+                self._movieTime = min(
+                    self._movieTime + (now - self._lastFrameAbsTime), 
+                    self.duration)
+            else:
+                if self._loop:
+                    # if looping, reset the movie time to 0
+                    self._movieTime = 0.0
+                    self._loopCount += 1  # increment loop count
+                else:
+                    # if not looping, stop playback
+                    self._playbackStatus = STOPPED
+                    return
         elif self._playbackStatus == STOPPED:
             self._movieTime = 0.0
 
@@ -1436,7 +1486,7 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
             return False
         
         frameImage, pts, _ = frameData
-        
+
         # check if we are seeking
         # if self._playbackStatus == SEEKING:
         #     if self._wasPaused:
@@ -1812,7 +1862,7 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         # stop should reset the video to the start and pause
         if self._player is not None:
             self._player.close()
-
+    
         self._playbackStatus = STOPPED
 
     def seek(self, timestamp, log=True):
@@ -1985,7 +2035,7 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         if not self._player:
             return -1
 
-        return 0
+        return self._loopCount
 
     @property
     def fps(self):
