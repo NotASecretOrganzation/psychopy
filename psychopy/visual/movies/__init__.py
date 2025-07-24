@@ -383,7 +383,8 @@ class MovieFileReader:
 
         """
         if self._metadata is None:
-            raise ValueError('Movie metadata not available. Movie not open.')
+            return NULL_MOVIE_METADATA
+            # raise ValueError('Movie metadata not available. Movie not open.')
 
         return self._metadata
     
@@ -517,7 +518,7 @@ class MovieFileReader:
         reqPTS = min(max(0.0, reqPTS), self._metadata.duration)
 
         if self._player is None:
-            raise ValueError('Movie reader is not open. Cannot seek.')
+            return
         
         # clear the frame store
         self._cleanUpFrameStore()
@@ -579,7 +580,7 @@ class MovieFileReader:
 
         """
         if self._player is None:
-            raise ValueError('Movie reader is not open. Cannot buffer frames.')
+            return
 
         # check if we have a valid start time
         if start < 0.0:
@@ -703,6 +704,8 @@ class MovieFileReader:
         if self in _openMovieReaders:
             raise RuntimeError(
                 'Movie reader already open for file: {}'.format(self._filename))
+        
+        self._playbackStatus = NOT_STARTED  # reset playback status
         
         _openMovieReaders.add(self)
 
@@ -886,7 +889,7 @@ class MovieFileReader:
 
         """
         if self._player is None:
-            raise ValueError('Movie reader is not open. Cannot pause.')
+            return
 
         self._player.set_pause(bool(state))
 
@@ -930,7 +933,7 @@ class MovieFileReader:
 
         """
         if self._player is None:
-            raise ValueError('Movie reader is not open. Cannot mute.')
+            return
 
         self._player.set_mute(bool(state))
 
@@ -989,7 +992,8 @@ class MovieFileReader:
 
         """
         if self._player is None:
-            raise ValueError('Movie reader is not open. Cannot get subtitle.')
+            return ''
+            #raise ValueError('Movie reader is not open. Cannot get subtitle.')
 
         return ''
 
@@ -1359,6 +1363,10 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         # update size in case frame size has changed
         self.size = self._requestedSize
 
+        # reset movie state and timekeeping variables
+        self._playbackStatus = NOT_STARTED  # reset playback status
+        self._pts = 0.0  # reset presentation timestamp
+        self._movieTime = 0.0  # reset movie time
         self._isLoaded = True
 
     def _setupAudioStream(self):
@@ -1490,14 +1498,17 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
             else:
                 if self._loop:
                     # if looping, reset the movie time to 0
-                    self._movieTime = 0.0
                     self._loopCount += 1  # increment loop count
                 else:
                     # if not looping, stop playback
-                    self._playbackStatus = STOPPED
-                    return
-        elif self._playbackStatus == STOPPED:
-            self._movieTime = 0.0
+                    self._player.pause(True)
+                    self._movieTime = self.duration  # set to end of movie
+                    self._playbackStatus = FINISHED  # indicate movie is done
+                
+                self._movieTime = 0.0
+
+        elif self._playbackStatus == NOT_STARTED:
+            self._movieTime = 0.0  # reset movie time to 0
 
         # if paused, the movie time does not advance but we still need to
         # update the last frame time
@@ -1574,8 +1585,8 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
             if self._textureId.value > 0:
                 GL.glDeleteTextures(1, self._textureId)
                 self._textureId = GL.GLuint()
-
-        except TypeError:  # can happen when unloading or shutting down
+            
+        except Exception:  # can happen when unloading or shutting down
             pass
 
     def _setupTextureBuffers(self):
@@ -1836,7 +1847,8 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
 
     @property
     def isFinished(self):
-        """`True` if the video is finished (`bool`).
+        """`True` if the video is finished (`bool`). Reports the same status as
+        `isStopped` if the video is stopped.
         """
         return self._playbackStatus == FINISHED
     
@@ -1857,8 +1869,11 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
             Log the play event.
 
         """
-        # if self._playbackStatus == PLAYING:
-        #    return  # nop
+        if self._player is None:
+            return
+        
+        if self._playbackStatus == PLAYING:
+           return  # nop
         
         if not self._noAudio:
             if self._audioLib == 'sdl2':
@@ -1867,7 +1882,12 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         self._player.pause(False)  # start the player
         self._playbackStatus = PLAYING
         self._wasPaused = False  # reset the paused flag
-        # self._lastFrameAbsTime = core.getTime()  # get the current time
+        self._lastFrameAbsTime = core.getTime()  # get the current time
+
+        if log:
+            logging.info(
+                "Movie playback {} started at {:.2f} seconds".format(
+                    self._filename, self._movieTime))
 
     def pause(self, log=True):
         """Pause the current point in the movie. The image of the last frame
@@ -1884,12 +1904,17 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
                 self._player.mute(True)
 
         self._player.pause()
+        self._wasPaused = True  # set the paused flag
         self._playbackStatus = PAUSED
+
+        if log:
+            logging.info("Movie {} paused at position {:.2f} seconds".format(
+                self._filename, self._movieTime))
 
     def toggle(self, log=True):
         """Switch between playing and pausing the movie. If the movie is playing,
         this function will pause it. If the movie is paused, this function will
-        play it.
+        begin playback from the current position.
 
         Parameters
         ----------
@@ -1907,6 +1932,10 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         will not advance and remain on-screen). Once stopped the movie can be
         restarted from the beginning by calling `play()`.
 
+        Note that this method will fully unload the movie and reset the
+        player instance. If you want to reset the movie without unloading it,
+        use `seek(0.0)` instead.
+
         Parameters
         ----------
         log : bool
@@ -1914,10 +1943,20 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
 
         """
         # stop should reset the video to the start and pause
-        if self._player is not None:
-            self._player.close()
-    
-        self._playbackStatus = STOPPED
+        if self._player is None:
+            return  # nothing to stop
+
+        if log:
+            logging.debug("Stopping movie: {}".format(self._filename))
+
+        self._player.close()  # close the player
+
+        self.loadMovie(self._filename)  # reload the movie
+        
+        self._playbackStatus = NOT_STARTED
+
+        if log:
+            logging.info("Movie stopped: {}".format(self._filename))
 
     def seek(self, timestamp, log=True):
         """Seek to a particular timestamp in the movie.
@@ -1990,11 +2029,16 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
           you would like to restart the movie without reloading.
 
         """
-        # self._lastFrameAbsTime = -1.0
         self._movieTime = 0.0  # reset movie time
         self.seek(self._movieTime)
         self.play()
 
+    def reset(self):
+        """Reset the movie to its initial state.
+        """
+        # self.seek(0.0)  # reset movie time to 0
+        self._playbackStatus = NOT_STARTED  # reset playback status
+        
     # --------------------------------------------------------------------------
     # Audio stream control methods
     #
