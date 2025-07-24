@@ -809,15 +809,15 @@ class TableCtrl(FileCtrl):
         """
         Either open the specified excel sheet, or make a new one from a template
         """
+        file = Path(self.getValue())
         # make path absolute
         if not file.is_absolute():
             file = self.rootDir / file
         # open a template if not a valid file
-        if not (file.is_file() or file.suffix not in self.validExt):
+        if file == self.rootDir or not (file.is_file() or file.suffix not in self.validExt):
             dlg = wx.MessageDialog(self, _translate(
-                    "Once you have created and saved your table,"
-                    "please remember to add it to {name}"
-                ).format(name=_translate(self.Name)),
+                    "Once you have created and saved your table, remember to add it here."
+                ),
                 caption=_translate("Reminder")
             )
             dlg.ShowModal()
