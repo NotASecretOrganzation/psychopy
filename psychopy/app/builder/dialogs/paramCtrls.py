@@ -429,7 +429,12 @@ class NameCtrl(SingleLineCtrl):
         # start off valid
         BaseParamCtrl.validate(self)
         # is name a valid name?
-        if NameSpace.isValid(self.getValue()):
+        if self.getValue() == "":
+            # prompt to enter a name if blank
+            self.setWarning(_translate(
+                "Please enter a name"
+            ), allowed=False)
+        elif NameSpace.isValid(self.getValue()):
             # if we have an experiment, is the name used already?
             if self.element:
                 # if unchanged from original name, it does exist but is valid
