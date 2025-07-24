@@ -158,10 +158,6 @@ class AddDeviceDlg(wx.Dialog):
         self.devicesLoadingLbl.Hide()
         self.devicesCtrl.Show()
         self.Layout()
-    
-    def __del__(self):
-        # imageList has to be deleted manually due to garbage collection bug in TreeCtrl
-        del self.imageList
 
     def populateAsync(self, evt):
         """
@@ -199,6 +195,9 @@ class AddDeviceDlg(wx.Dialog):
 
     def onSelectItem(self, evt):
         evt.Skip()
+        # this event is triggered on deletion due to a bug in wx.TreeCtrl, so catch it
+        if not self.devicesCtrl:
+            return
         # get id of selected profile and its parent
         item = self.devicesCtrl.GetSelection()
         branch = self.devicesCtrl.GetItemParent(item)
