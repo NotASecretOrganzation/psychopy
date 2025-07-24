@@ -580,6 +580,13 @@ class ChoiceCtrl(BaseParamCtrl):
                 self.labels.append(str(labels[i]))
             else:
                 self.labels.append(str(choices[i]))
+        # translate labels
+        for i in range(len(self.labels)):
+            # An empty string must not be translated
+            # because it returns meta information of
+            # .mo file (due to specification of gettext)
+            if self.labels[i] != '':
+                self.labels[i] = _translate(self.labels[i])
         # apply to ctrl
         self.ctrl.SetItems(self.labels)
         # disable if param is readonly
@@ -594,7 +601,11 @@ class ChoiceCtrl(BaseParamCtrl):
         if str(value) not in self.choices:
             # if not known, add it to possible choices
             self.choices.append(str(value))
-            self.labels.append(str(value))
+            # translate label if the value is not ''
+            if str(value) != '':
+                self.labels.append(_translate(str(value)))
+            else:
+                self.labels.append(str(value))
             self.ctrl.SetItems(self.labels)
         # set
         self.ctrl.SetSelection(
