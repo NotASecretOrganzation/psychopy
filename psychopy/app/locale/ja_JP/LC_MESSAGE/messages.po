@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: PsychoPy 2025.2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-07-09 20:32+0900\n"
-"PO-Revision-Date: 2025-07-09 20:36+0900\n"
+"PO-Revision-Date: 2025-07-16 14:09+0900\n"
 "Last-Translator: Hiroyuki Sogo <hsogo12600@gmail.com>\n"
 "Language-Team: Hiroyuki Sogo <hsogo12600@gmail.com>\n"
 "Language: ja\n"
@@ -3814,7 +3814,7 @@ msgstr "警告"
 
 #: app/localizedStrings.py:377
 msgid "From theme..."
-msgstr "テーマに従う"
+msgstr "テーマに従う..."
 
 #: app/pavlovia_ui/_base.py:34
 #, python-format
@@ -5417,7 +5417,7 @@ msgstr ""
 
 #: experiment/components/camera/__init__.py:35
 msgid "Webcam: Record video from a webcam."
-msgstr "Webcam: ウェブカメラによるビデオ録画"
+msgstr "Webcam: ウェブカメラによるビデオ録画."
 
 #: experiment/components/movie/__init__.py:63
 msgid "Backend"
@@ -7777,7 +7777,7 @@ msgstr ""
 
 #: experiment/components/soundsensor/__init__.py:14
 msgid "Voice Key: Get input from a microphone as simple true/false values"
-msgstr "Voice Key: マイクからの入力をTrue/Falseで記録します."
+msgstr "Voice Key: マイクからの入力をTrue/Falseで記録します"
 
 #: experiment/components/soundsensor/__init__.py:85
 msgid ""
@@ -8770,7 +8770,7 @@ msgstr ""
 
 #: experiment/routines/visualValidator/__init__.py:96
 msgid "Position of the light sensor on the window."
-msgstr "ウィンドウ上の光センサの位置"
+msgstr "ウィンドウ上の光センサの位置."
 
 #: experiment/routines/visualValidator/__init__.py:102
 msgid "Size [x,y]"
@@ -8884,7 +8884,7 @@ msgstr ""
 
 #: hardware/speaker.py:164
 msgid "No audio devices found!"
-msgstr "オーディオデバイスが見つかりません"
+msgstr "オーディオデバイスが見つかりません!"
 
 #: hardware/speaker.py:188
 #, python-brace-format
@@ -10378,6 +10378,9 @@ msgid ""
 "is enabled, this mode has little benefit over \"Shared low latency\" mode, "
 "with some drawbacks."
 msgstr ""
+"スピーカー {deviceName} は\"排他的な短遅延\"モードに設定されています. この"
+"モードはいくつか欠点もありますが, 再サンプリングが有効なので, \"共有可能な範"
+"囲で短遅延\"モードに対して一定の利点があります."
 
 #: alerts/alertsCatalogue/alertmsg.py:35
 #, python-brace-format
@@ -10385,11 +10388,13 @@ msgid ""
 "Multiple Components in the same Routine are validated by {validator}, please "
 "ensure that the timing of these Components do not overlap."
 msgstr ""
+"同一ルーチンに配置された複数のコンポーネントが {validator} で検証されようとし"
+"ています. これらのコンポーネントのタイミングが重ならないよう注意してください."
 
 #: alerts/alertsCatalogue/alertmsg.py:62
 #, python-brace-format
 msgid "Static Component `{name}` given infinite stop time"
-msgstr ""
+msgstr "Staticコンポーネント `{name}` の終了が指定されていません"
 
 #: alerts/alertsCatalogue/alertmsg.py:89
 #, python-brace-format
@@ -10397,6 +10402,8 @@ msgid ""
 "Font `{font} {style}` not available in weight `{weight}`, component `{name}` "
 "will default to Open Sans Regular."
 msgstr ""
+"フォント `{font} {style}`はウェイト `{weight}`で使用できません. コンポーネン"
+"ト `{name}`のフォントはOpen Sans Regularになります."
 
 #: alerts/alertsCatalogue/alertmsg.py:153
 #, python-brace-format
@@ -10404,59 +10411,62 @@ msgid ""
 "Could not find any config for device {deviceName}, please setup this device "
 "up in the Device Manager dialog (from Builder).\""
 msgstr ""
+"{deviceName}デバイスの設定が見つかりません. Builderからデバイスマネージャを開"
+"いてこのデバイスを設定してください."
 
 #: app/builder/builder.py:1589 app/coder/coder.py:2861
 msgid "The package index is currently being updated. Please try again later."
-msgstr ""
+msgstr "パッケージ一覧を更新中です. 後でもう一度試みてください."
 
 #: app/builder/builder.py:1593 app/coder/coder.py:2865
 msgid "Package indexing in progress"
-msgstr ""
+msgstr "パッケージの一覧を作成中"
 
 #: app/builder/builder.py:4575
 msgid "Device manager"
-msgstr ""
+msgstr "デバイスマネージャ"
 
 #: app/builder/builder.py:4577
 msgid "Map devices from this machine to names in your experiment"
-msgstr ""
+msgstr "この機器のデバイスに対して、実験内から参照するための名前をつけます"
 
 #: app/builder/dialogs/paramCtrls.py:351
 #, python-brace-format
 msgid "Setting the variable `{}` will overwrite an existing variable ({})"
-msgstr ""
+msgstr "変数`{}`を設定すると既存の変数`{}`が上書きされます"
 
 #: app/builder/dialogs/paramCtrls.py:361
 #, python-brace-format
 msgid "Looks like your variable '{}' in '{}' should be set to update."
-msgstr ""
+msgstr "変数'{}' ('{}'内)は更新するように設定しないといけないと思われます."
 
 #: app/builder/dialogs/paramCtrls.py:369
 msgid "Quotation marks (\" or ') need to be escaped (\\\" or \\')"
 msgstr ""
+"引用符(\" および ')は(\\\" や \\'といったように)エスケープする必要があります"
 
 #: app/builder/dialogs/paramCtrls.py:442
 #, python-brace-format
 msgid "Name is already in use ({})"
-msgstr ""
+msgstr "名前({})は既に使用されています"
 
 #: app/builder/dialogs/paramCtrls.py:446
 msgid "Name is not valid"
-msgstr ""
+msgstr "無効な名前です"
 
 #: app/builder/dialogs/paramCtrls.py:659
 msgid "Browse for a file"
-msgstr ""
+msgstr "ファイルを選択"
 
 #: app/builder/dialogs/paramCtrls.py:734
 #, python-brace-format
 msgid "Not a valid file path: {}"
-msgstr ""
+msgstr "{} は有効なファイルパスではありません"
 
 #: app/builder/dialogs/paramCtrls.py:746
 #, python-brace-format
 msgid "No file named {}"
-msgstr ""
+msgstr "{} というファイルがありません"
 
 #: app/builder/dialogs/paramCtrls.py:1373
 #: app/builder/dialogs/paramCtrls.py:1556
@@ -10465,30 +10475,31 @@ msgstr "項目を追加"
 
 #: app/builder/dialogs/paramCtrls.py:1461
 msgid "Dictionary keys can't be code"
-msgstr ""
+msgstr "辞書オブジェクトのキーとしてコードは使用できません"
 
 #: app/builder/dialogs/paramCtrls.py:1628
 #, python-brace-format
 msgid "Duplicate dictionary key: {}"
-msgstr ""
+msgstr "キー({})が重複しています"
 
 #: app/builder/dialogs/paramCtrls.py:1658
 msgid "Open the Device Manager to setup devices"
-msgstr ""
+msgstr "デバイスマネージャを開いてデバイスを管理します"
 
 #: app/builder/dialogs/paramCtrls.py:1687
 #, python-brace-format
 msgid ""
 "No device named `{}` has been setup in the Device Manager, set one up now?"
 msgstr ""
+"デバイスマネージャに{}というデバイスは登録されていません. いま登録しますか?"
 
 #: app/deviceManager/addDialog.py:46 experiment/devices.py:98
 msgid "A name to refer to this device by in Device Manager."
-msgstr ""
+msgstr "デバイスマネージャ上でこのデバイスを管理するための名前."
 
 #: app/deviceManager/addDialog.py:67
 msgid "Available devices"
-msgstr ""
+msgstr "利用可能なデバイス"
 
 #: app/deviceManager/addDialog.py:84
 msgid "Scanning..."
@@ -10505,11 +10516,18 @@ msgid ""
 "{}\n"
 "(so you don't need to type it yourself)\n"
 msgstr ""
+"pipコマンドを入力してEnterキーをおしてPsychoPy環境にパッケージをインストール"
+"します. pipから返されたテキストが表示されます. インストール時には `--user` オ"
+"プションをコマンドの最後につけるのを忘れないでください!\n"
+"\n"
+"すべてのコマンドの前には自動的に\n"
+"{}\n"
+"がつけられます(なので自分で入力する必要はありません).\n"
 
 #: app/plugin_manager/packages.py:188 app/plugin_manager/packages.py:192
 #: app/plugin_manager/packages.py:348 app/plugin_manager/packages.py:392
 msgid "User Packages"
-msgstr ""
+msgstr "ユーザーパッケージ"
 
 #: app/plugin_manager/packages.py:189 app/plugin_manager/packages.py:193
 #: app/plugin_manager/packages.py:351 app/plugin_manager/packages.py:382
@@ -10520,130 +10538,131 @@ msgstr "システムパッケージ"
 #: app/plugin_manager/packages.py:354 app/plugin_manager/packages.py:398
 #: app/plugin_manager/packages.py:403
 msgid "Available Packages"
-msgstr ""
+msgstr "利用可能なパッケージ"
 
 #: data/experiment.py:305
 #, python-brace-format
 msgid "Cannot add data to row {} as there are only {} entries"
-msgstr ""
+msgstr "データを{}行に追加できません. {}項目しかありません"
 
 #: experiment/components/camera/__init__.py:133 experiment/devices.py:55
 msgid "The named device from Device Manager to use for this Component."
 msgstr ""
+"このコンポーネントで使用するデバイス名(デバイスマネージャに登録済みのもの)"
 
 #: experiment/monitor.py:34
 msgid "Position (x, y)"
-msgstr ""
+msgstr "位置 (x, y)"
 
 #: experiment/monitor.py:36
 msgid ""
 "Position of the patch of pixels to pretend there is a photometer looking at"
-msgstr ""
+msgstr "フォトメーターが測定する(と想定する)パッチの位置"
 
 #: experiment/monitor.py:41
 msgid "Size (w, h)"
-msgstr ""
+msgstr "サイズ (w, h)"
 
 #: experiment/monitor.py:43
 msgid "Size of the patch of pixels to pretend there is a photometer looking at"
-msgstr ""
+msgstr "フォトメーターが測定する(と想定する)パッチのサイズ"
 
 #: experiment/monitor.py:53
 msgid "Spatial units in which to interpret size and position"
-msgstr ""
+msgstr "大きさと位置の単位"
 
 #: experiment/components/camera/__init__.py:131
 msgid "Microphone device"
-msgstr ""
+msgstr "マイクデバイス"
 
 #: experiment/components/serialOut/__init__.py:56
 msgid "start"
-msgstr ""
+msgstr "開始"
 
 #: experiment/components/serialOut/__init__.py:57
 msgid "stop"
-msgstr ""
+msgstr "終了"
 
 #: experiment/components/serialOut/__init__.py:64
 msgid "String"
-msgstr ""
+msgstr "文字列"
 
 #: experiment/components/serialOut/__init__.py:64
 msgid "Numeric (0-255)"
-msgstr ""
+msgstr "数値 (0-255)"
 
 #: experiment/components/serialOut/__init__.py:65
 msgid "Binary"
-msgstr ""
+msgstr "バイナリ"
 
 #: experiment/components/serialOut/__init__.py:65
 msgid "Character (Byte)"
-msgstr ""
+msgstr "文字 (Byte)"
 
 #: experiment/components/serialOut/__init__.py:65
 msgid "Code"
-msgstr ""
+msgstr "コード"
 
 #: experiment/components/serialOut/__init__.py:68
 msgid ""
 "Type of data to be sent: A number, a binary sequence, a character byte, or "
 "custom code ($)"
-msgstr ""
+msgstr "送信するデータの型: 数値, バイナリ列, 文字, またはカスタムコード($)"
 
 #: experiment/components/serialOut/__init__.py:70
 #, python-brace-format
 msgid "{} data type"
-msgstr ""
+msgstr "{}データ型"
 
 #: experiment/components/serialOut/__init__.py:75
 #, python-brace-format
 msgid "Send a regular string (which will be converted to binary) on {}"
-msgstr ""
+msgstr "{}で通常の文字列を(バイナリ列に変換して)送信"
 
 #: experiment/components/serialOut/__init__.py:76
 #, python-brace-format
 msgid "{} data (string)"
-msgstr ""
+msgstr "{}データ(文字列)"
 
 #: experiment/components/serialOut/__init__.py:88
 #, python-brace-format
 msgid "Send a number between 0-255 on {}"
-msgstr ""
+msgstr "{}で0から255の数値を送信"
 
 #: experiment/components/serialOut/__init__.py:89
 #, python-brace-format
 msgid "{} data (numeric)"
-msgstr ""
+msgstr "{}データ(数値)"
 
 #: experiment/components/serialOut/__init__.py:101
 #, python-brace-format
 msgid "Send a binary sequence (1s and 0s) on {}"
-msgstr ""
+msgstr "{}でバイナリ列(0/1の列)を送信"
 
 #: experiment/components/serialOut/__init__.py:102
 #, python-brace-format
 msgid "{} data (binary)"
-msgstr ""
+msgstr "{}データ(バイナリ)"
 
 #: experiment/components/serialOut/__init__.py:114
 #, python-brace-format
 msgid "Send a character byte (e.g. \\x73) on {}"
-msgstr ""
+msgstr "{}で文字コード(\\x73など)を送信"
 
 #: experiment/components/serialOut/__init__.py:115
 #, python-brace-format
 msgid "{} data (char)"
-msgstr ""
+msgstr "{}データ(文字)"
 
 #: experiment/components/serialOut/__init__.py:127
 #, python-brace-format
 msgid "Send custom code (e.g. from a variable) on {}"
-msgstr ""
+msgstr "{}でカスタムコード(変数など)を送信"
 
 #: experiment/components/serialOut/__init__.py:128
 #, python-brace-format
 msgid "{} data (code)"
-msgstr ""
+msgstr "{}データ(コード)"
 
 #: hardware/button.py:211
 #, python-brace-format
@@ -10651,38 +10670,41 @@ msgid ""
 "Could not find device named '{}', make sure it has been set up in "
 "DeviceManager."
 msgstr ""
+"'{}'というデバイスが見つかりません. デバイスマネージャに登録されているか確認"
+"してください."
 
 #: monitors/MonitorCenter.py:1088
 msgid "Calibrate gamma"
-msgstr ""
+msgstr "ガンマ補正"
 
 #: monitors/MonitorCenter.py:1106
 msgid "Screen to run the calibration on"
-msgstr ""
+msgstr "キャリブレーションを行うスクリーン"
 
 #: monitors/MonitorCenter.py:1130
 msgid "Photometer"
-msgstr ""
+msgstr "フォトメーター"
 
 #: monitors/MonitorCenter.py:1132
 msgid "Photometer device, from the device manager, to use for this calibration"
 msgstr ""
+"個のキャリブレーションに使用する測定器をデバイスマネージャから選択します"
 
 #: monitors/MonitorCenter.py:1137
 msgid "Patch size"
-msgstr ""
+msgstr "パッチサイズ"
 
 #: monitors/MonitorCenter.py:1139
 msgid "How much of the screen (0-1) the calibration patch should occupy"
-msgstr ""
+msgstr "パッチが画面に占める割合(0-1)"
 
 #: monitors/MonitorCenter.py:1144
 msgid "Calibration points"
-msgstr ""
+msgstr "キャリブレーション点"
 
 #: monitors/MonitorCenter.py:1146
 msgid "How many calibration points to use"
-msgstr ""
+msgstr "キャリブレーション点の個数"
 
 #~ msgid "Specify file ..."
 #~ msgstr "ファイルを選択..."
