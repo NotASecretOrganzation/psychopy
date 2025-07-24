@@ -2063,7 +2063,7 @@ class Camera:
         self._absVideoRecStopTime = self._capture.stop()
         
         # stop audio recording if we have a microphone
-        if self.mic is not None:
+        if self.hasMic and not self.mic._stream._closed:
             _, overflows = self.mic.poll()
 
             if overflows > 0:
@@ -2364,7 +2364,7 @@ class Camera:
             # if we have new frames, we can set the video ready flag
             self._videoReady = True
 
-        if self.hasMic:
+        if self.hasMic and not self.mic._stream._closed:
             # poll the microphone for audio samples
             audioPos, overflows = self.mic.poll()
 
