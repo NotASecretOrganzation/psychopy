@@ -1960,7 +1960,7 @@ class Camera:
 
         self._isStarted = True
 
-    def record(self, clearLastRecording=True, waitForStart=True):
+    def record(self, clearLastRecording=True, waitForStart=False):
         """Start recording frames.
 
         This function will start recording frames and audio (if available). The
