@@ -410,6 +410,10 @@ class SingleLineCtrl(BaseParamCtrl):
                 self.setValue(
                     re.sub(r"(?<!\\)[\u201c\u201d]", "\"", self.getValue())
                 )
+            if re.findall(r"(?<!\\)[\u2018\u2019]", self.getValue()):
+                self.setValue(
+                    re.sub(r"(?<!\\)[\u2018\u2019]", "\'", self.getValue())
+                )
         else:
             pass
 
