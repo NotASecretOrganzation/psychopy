@@ -610,16 +610,22 @@ class CameraDevice(BaseDevice):
                     'pixels': 0,
                     'frameRate': 0
                 }
-                minFrameRate = max(30, min([cam.frameRate for cam in allCams]))
+                bestResolution = None
+                minFrameRate = max(28, min([cam.frameRate for cam in allCams]))
                 for cam in allCams:
                     # summarise spec of this cam
                     current = {
                         'pixels': cam.frameSize[0] * cam.frameSize[1],
                         'frameRate': cam.frameRate
                     }
+                    # store best frame rate as a fallback
+                    if bestResolution is None or current['pixels'] > lastBest['pixels']:
+                        bestResolution = cam
                     # if it's better than the last, set it as the only cam
                     if current['pixels'] > lastBest['pixels'] and current['frameRate'] >= minFrameRate:
                         cams = [cam]
+                # if no cameras meet frame rate requirement, use one with best resolution
+                cams = [bestResolution]
             # iterate through all (possibly filtered) cameras
             for cam in cams:
                 # construct a dict profile from the CameraInfo object

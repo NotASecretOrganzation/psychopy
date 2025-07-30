@@ -1,4 +1,3 @@
-import threading
 from psychopy.app.deviceManager.utils import DeviceImageList
 from psychopy.app.builder.dialogs.paramCtrls import EVT_PARAM_CHANGED, ParamCtrl
 from psychopy.app.builder.validators import WarningManager
@@ -169,10 +168,7 @@ class AddDeviceDlg(wx.Dialog):
             wx event triggering this call
         """
         # populate
-        threading.Thread(
-            target=self.populate,
-            daemon=True
-        ).start()
+        self.populate()
         # unbind
         if evt.EventType == wx.EVT_IDLE.typeId:
             self.Unbind(wx.EVT_IDLE)

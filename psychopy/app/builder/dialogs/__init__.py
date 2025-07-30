@@ -478,6 +478,8 @@ class ParamNotebook(wx.Notebook, handlers.ThemeMixin):
         def addParam(self, name, param):
             # Make ctrl
             self.ctrls[name] = ParamCtrls(self.dlg, param.label, param, self, name)
+            # Bind change event
+            self.ctrls[name].valueCtrl.Bind(paramCtrls.EVT_PARAM_CHANGED, self.emitChangeEvent)
             # Add value ctrl
             _flag = wx.EXPAND | wx.ALL
             if hasattr(self.ctrls[name].valueCtrl, '_szr'):
@@ -589,6 +591,9 @@ class ParamNotebook(wx.Notebook, handlers.ThemeMixin):
                 if isinstance(self.dlg, wx.Dialog):
                     self.dlg.Fit()
                 self.Refresh()
+        
+        def emitChangeEvent(self, evt): 
+            wx.PostEvent(self, evt)
 
         def doValidate(self, event=None):
             self.Validate()
@@ -629,8 +634,13 @@ class ParamNotebook(wx.Notebook, handlers.ThemeMixin):
         for categ, params in paramsByCateg.items():
             page = self.CategoryPage(self, self.parent, params, categ=categ)
             self.paramCtrls.update(page.ctrls)
+            # Bind change event
+            page.Bind(paramCtrls.EVT_PARAM_CHANGED, self.emitChangeEvent)
             # Add page to notebook
             self.AddPage(page, _translate(categ))
+    
+    def emitChangeEvent(self, evt): 
+        wx.PostEvent(self, evt)
 
     def checkDepends(self, event=None):
         """
