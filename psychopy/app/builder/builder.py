@@ -256,7 +256,11 @@ class BuilderFrame(BaseAuiFrame, handlers.ThemeMixin):
         self._mgr.Update()
         # self.SetSizer(self.mainSizer)  # not necessary for aui type controls
         if self.frameData['auiPerspective']:
-            self._mgr.LoadPerspective(self.frameData['auiPerspective'])
+            backup = self._mgr.SavePerspective()
+            try:
+                self._mgr.LoadPerspective(self.frameData['auiPerspective'])
+            except:
+                self._mgr.LoadPerspective(backup)
         self.SetMinSize(wx.Size(600, 400))  # min size for the whole window
         self.SetSize(
             (int(self.frameData['winW']), int(self.frameData['winH'])))
@@ -450,6 +454,11 @@ class BuilderFrame(BaseAuiFrame, handlers.ThemeMixin):
                            _translate("Monitor Center"),
                            _translate("To set information about your monitor"))
         self.Bind(wx.EVT_MENU, self.app.openMonitorCenter, item)
+
+        item = menu.Append(wx.ID_ANY,
+                           _translate("Device Manager"),
+                           _translate("Setup named devices for your Components to refer to"))
+        self.Bind(wx.EVT_MENU, self.openDeviceManager, item)
 
         item = menu.Append(wx.ID_ANY,
                            _translate("Compile\t%s") % keys['compileScript'],
