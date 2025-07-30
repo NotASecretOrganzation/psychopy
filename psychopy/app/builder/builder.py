@@ -30,6 +30,7 @@ from wx.lib import platebtn
 from wx.html import HtmlWindow
 
 import psychopy.app.plugin_manager.dialog
+from .dialogs.paramCtrls import EVT_PARAM_CHANGED
 from .validators import WarningManager
 from ..pavlovia_ui import sync, PavloviaMiniBrowser
 from ..pavlovia_ui.project import ProjectFrame
@@ -2759,6 +2760,7 @@ class StandaloneRoutineCanvas(scrolledpanel.ScrolledPanel):
         # Setup categ notebook
         self.warnings = WarningManager(self)
         self.ctrls = ParamNotebook(self, experiment=self.frame.exp, element=routine)
+        self.ctrls.Bind(EVT_PARAM_CHANGED, self.updateExperiment)
         self.paramCtrls = self.ctrls.paramCtrls
         self.sizer.Add(self.ctrls, border=12, proportion=1, flag=wx.ALIGN_CENTER | wx.TOP)
         # Make buttons
