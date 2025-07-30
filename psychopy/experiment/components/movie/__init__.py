@@ -281,10 +281,7 @@ class MovieComponent(BaseVisualComponent):
             code = (
                 "%(name)s.setAutoDraw(False)\n"
             )
-            # redundant since `isFinished` is true when the movie is stopped
-            # if self.params['backend'].val not in ('moviepy', 'avbin', 'vlc'):
-            #     code += "%(name)s.stop()\n"
-            # buff.writeIndentedLines(code % self.params)
+            buff.writeIndentedLines(code % self.params)
         # to get out of the if statement
         buff.setIndentLevel(-indented, relative=True)
 
@@ -337,6 +334,7 @@ class MovieComponent(BaseVisualComponent):
         if self.params['stopWithRoutine']:
             # stop at the end of the Routine, if requested
             code = (
+                "%(name)s.setAutoDraw(False)\n"
                 "%(name)s.stop()  # ensure movie has stopped at end of Routine\n"
             )
             buff.writeIndentedLines(code % self.params)
