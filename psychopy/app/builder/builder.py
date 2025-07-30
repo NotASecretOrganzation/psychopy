@@ -2791,12 +2791,15 @@ class StandaloneRoutineCanvas(scrolledpanel.ScrolledPanel):
         for name, routine in routines.items():
             if routine == self.routine:
                 # Update the routine dict keys to use the current name for this routine
-                self.frame.exp.routines[self.routine.params['name'].val] = self.frame.exp.routines.pop(name)
+                self.frame.exp.routines[self.routine.name] = self.frame.exp.routines.pop(name)
+                # update experiment namespace
+                self.frame.exp.namespace.remove(name)
+                self.frame.exp.namespace.add(self.routine.name)
         # Redraw the flow panel
         self.frame.flowPanel.canvas.draw()
         # Rename this page
         page = self.frame.routinePanel.GetPageIndex(self)
-        self.frame.routinePanel.SetPageText(page, self.routine.params['name'].val)
+        self.frame.routinePanel.SetPageText(page, self.routine.name)
         # Update save button
         self.frame.setIsModified(True)
 
