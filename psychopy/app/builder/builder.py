@@ -452,6 +452,11 @@ class BuilderFrame(BaseAuiFrame, handlers.ThemeMixin):
         self.Bind(wx.EVT_MENU, self.app.openMonitorCenter, item)
 
         item = menu.Append(wx.ID_ANY,
+                           _translate("Device Manager"),
+                           _translate("Setup named devices for your Components to refer to"))
+        self.Bind(wx.EVT_MENU, self.openDeviceManager, item)
+
+        item = menu.Append(wx.ID_ANY,
                            _translate("Compile\t%s") % keys['compileScript'],
                            _translate("Compile the exp to a script"))
         self.Bind(wx.EVT_MENU, self.compileScript, item)
