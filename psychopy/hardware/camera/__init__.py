@@ -474,7 +474,7 @@ class CameraDevice(BaseDevice):
             for profile in self.getAvailableDevices(False):
                 if profile['device'] == device:
                     foundProfile = profile
-                    device = profile['device']
+                    device = profile['deviceName']
                     break
         elif isinstance(device, str):
             # if device is a string, use it as the device name
@@ -579,7 +579,7 @@ class CameraDevice(BaseDevice):
         elif isinstance(other, Camera):
             return getattr(other, "_capture", None) == self
         elif isinstance(other, dict) and "device" in other:
-            return other['device'] == self._device
+            return other['deviceName'] == self._device
         else:
             return False
 
@@ -828,7 +828,10 @@ class CameraDevice(BaseDevice):
         time. If the camera stream is not open, this will return `-1.0`.
         
         """
-        return self._capture.get_pts() if self._capture is not None else -1.0
+        if self._cameraAPI == CAMERA_API_AVFOUNDATION:
+            return time.time() if self._capture is not None else -1.0
+        else:
+            return self._capture.get_pts() if self._capture is not None else -1.0
     
     def _toNumpyView(self, frame):
         """Convert a frame to a Numpy view.
@@ -907,9 +910,10 @@ class CameraDevice(BaseDevice):
                 _frameRate = str(self._frameRate)
 
             # need these since hardware acceleration is not possible on Mac yet
-            lib_opts['fflags'] = 'nobuffer'
+            # lib_opts['fflags'] = 'nobuffer'
             lib_opts['flags'] = 'low_delay'
             lib_opts['pixel_format'] = self._pixelFormat
+            lib_opts['use_wallclock_as_timestamps'] = '1'
             # ff_opts['framedrop'] = True
             # ff_opts['fast'] = True
         elif self._captureAPI == CAMERA_API_VIDEO4LINUX2:
@@ -925,7 +929,7 @@ class CameraDevice(BaseDevice):
         logging.debug(
             "Using camera mode {}x{} at {} fps".format(
                 camWidth, camHeight, _frameRate))
-
+        
         # configure the real-time buffer size, we compute using RGB8 since this 
         # is uncompressed and represents the largest size we can expect
         self._frameSizeBytes = int(camWidth * camHeight * 3)
@@ -1025,19 +1029,19 @@ class CameraDevice(BaseDevice):
             if frame is None:  # ditto 
                 break
 
-            self._frameCount += 1  # increment the frame count
-
             img, curPts = frame
             if curPts < self._absRecStreamStartTime and self._isRecording:
                 del img  # free the memory used by the frame
                 # if the frame is before the recording start time, skip it
                 continue
 
+            self._frameCount += 1  # increment the frame count
+
             recentFrames.append((
                 img, 
                 curPts-self._absRecStreamStartTime,
                 curPts))
-            
+
         return recentFrames
     
     # --------------------------------------------------------------------------
@@ -1186,8 +1190,14 @@ class CameraDevice(BaseDevice):
         self._frameCount = 0  # reset the frame count
         self._clearFrameStore()  # clear the frame store
         self._capture.set_pause(False)  # start the capture stream
-        self._absRecStreamStartTime = self._capture.get_pts()  # get the absolute start time
-        self._absRecExpStartTime = core.getTime()  # expected start time in seconds
+
+        # need to use a different timebase on macOS, due to a bug
+        if self._cameraAPI == CAMERA_API_AVFOUNDATION:
+            self._absRecStreamStartTime = time.time()
+        else:
+            self._absRecStreamStartTime = self._capture.get_pts()  # get the absolute start time
+
+        self._absRecExpStartTime = core.getTime()  # experiment start time in seconds
         self._isRecording = True 
 
         return self._absRecStreamStartTime
@@ -1209,9 +1219,15 @@ class CameraDevice(BaseDevice):
 
         """
         self._capture.set_pause(True)
+
+        if self._cameraAPI == CAMERA_API_AVFOUNDATION:
+            absStopTime = time.time()
+        else:
+            absStopTime = self._capture.get_pts()
+
         self._isRecording = False
 
-        return self._capture.get_pts()
+        return absStopTime
 
     @property
     def isRecording(self):
@@ -1600,6 +1616,15 @@ class Camera:
         if self._absRecStreamStartTime < 0:
             return 0.0
         
+        if self._cameraAPI == CAMERA_API_AVFOUNDATION:
+            return time.time() - self._absRecStreamStartTime
+        
+        # for other APIs, use the PTS value
+        curPts = self._capture.get_pts()
+        if curPts is None:
+            return 0.0
+        
+        # return the difference between the current PTS and the absolute start time
         return self._capture.get_pts() - self._absRecStreamStartTime
 
     @property
@@ -2021,6 +2046,8 @@ class Camera:
         if clearLastRecording:
             self._frameStore.clear()  # clear frames from last recording
 
+        self._capture._clearFrameStore()
+
         # reset the movie writer
         self._openMovieFileWriter()
 
@@ -2151,7 +2178,8 @@ class Camera:
         tStart = time.time()  # start time for the operation
         if self.mic is not None:
             audioTrack = self.mic.getRecording()
-
+        
+        if audioTrack is not None:
             logging.debug(
                 "Saving audio track to file `{}`...".format(filename))
             
@@ -2177,6 +2205,10 @@ class Camera:
                 from moviepy.audio.io.AudioFileClip import AudioFileClip
                 from moviepy.audio.AudioClip import CompositeAudioClip
 
+                videoClip = VideoFileClip(videoTrackFile)
+                audioClip = AudioFileClip(audioTrackFile)
+                videoClip.audio = CompositeAudioClip([audioClip])
+
                 # default options for the writer, needed or we can crash
                 moviePyOpts = {
                     'logger': None
@@ -2184,10 +2216,6 @@ class Camera:
 
                 if writerOpts is not None:  # make empty dict if not provided
                     moviePyOpts.update(writerOpts)
-
-                videoClip = VideoFileClip(videoTrackFile)
-                audioClip = AudioFileClip(audioTrackFile)
-                videoClip.audio = CompositeAudioClip([audioClip])
 
                 # transcode with the format the user wants
                 videoClip.write_videofile(
@@ -2231,6 +2259,8 @@ class Camera:
         logging.info(
             "Saved recorded video to `{}` (took {:.6f} seconds)".format(
                 filename, time.time() - tStart))
+
+        self._frameStore.clear()  # clear the frame store
 
         self._lastVideoFile = filename  # store the last video file saved
 
@@ -2854,13 +2884,14 @@ class Camera:
 
         # options to configure the writer
         frameWidth, frameHeight = self.frameSize
+
         writerOptions = {
             'pix_fmt_in': 'yuv420p',  # default for now using mp4
             'width_in': frameWidth,
             'height_in': frameHeight,
             # 'codec': '',
             'frame_rate': (int(self._capture.frameRate), 1)}
-        
+
         self._curPTS = 0.0  # current pts for the movie writer
 
         self._generatePTS = False  # whether to generate PTS for the movie writer
