@@ -42,8 +42,8 @@ extensions = [
   'sphinx.ext.viewcode',
   'sphinx_design', 
   'sphinx_copybutton',
-  'redirect'
-]
+  'redirect',
+  'sphinxcontrib.inkscapeconverter' # part of sphinxcontrib-svg2pdfconverter
 
 autoclass_content = 'both'
 autosummary_generate = True
