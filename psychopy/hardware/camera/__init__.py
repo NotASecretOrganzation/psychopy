@@ -910,7 +910,7 @@ class CameraDevice(BaseDevice):
                 _frameRate = str(self._frameRate)
 
             # need these since hardware acceleration is not possible on Mac yet
-            # lib_opts['fflags'] = 'nobuffer'
+            lib_opts['fflags'] = 'nobuffer'
             lib_opts['flags'] = 'low_delay'
             lib_opts['pixel_format'] = self._pixelFormat
             lib_opts['use_wallclock_as_timestamps'] = '1'
@@ -946,20 +946,27 @@ class CameraDevice(BaseDevice):
 
         # common settings across libraries
         ff_opts['low_delay'] = True  # low delay for real-time playback
-        ff_opts['framedrop'] = True
+        # ff_opts['framedrop'] = True
         # ff_opts['use_wallclock_as_timestamps'] = True
         ff_opts['fast'] = True
         # ff_opts['sync'] = 'ext'
         ff_opts['rtbufsize'] = str(_bufferSize)  # set the buffer size
+        ff_opts['an'] = True
+        # ff_opts['infbuf'] = True  # enable infinite buffering
 
         # for ffpyplayer, we need to set the video size and framerate
         lib_opts['video_size'] = '{width}x{height}'.format(
             width=camWidth, height=camHeight)
         lib_opts['framerate'] = str(_frameRate)
+        ff_opts['loglevel'] = 'error'
+        ff_opts['nostdin'] = True
 
         # open the media player
         from ffpyplayer.player import MediaPlayer
-        self._capture = MediaPlayer(_camera, ff_opts=ff_opts, lib_opts=lib_opts)
+        self._capture = MediaPlayer(
+            _camera, 
+            ff_opts=ff_opts, 
+            lib_opts=lib_opts)
 
         # compute the frame interval, needed for generating timestamps
         self._frameInterval = 1.0 / self._frameRate 
@@ -1001,6 +1008,7 @@ class CameraDevice(BaseDevice):
 
         """
         if self._capture is not None:
+            # self._capture.set_pause(True)  # pause the stream
             self._capture.close_player()
 
     def _getFramesFFPyPlayer(self):
@@ -1133,6 +1141,11 @@ class CameraDevice(BaseDevice):
         resources associated with it.
 
         """
+        if self.isRecording:
+            self.stop()  # stop the recording if it is in progress
+            logging.warning(
+                "CameraDevice.close() called while recording. Stopping.")
+
         if self._captureLib == 'ffpyplayer':
             self._closeFFPyPlayer()
 
@@ -1218,7 +1231,7 @@ class CameraDevice(BaseDevice):
         will stop capturing frames from the camera and clear the frame store.
 
         """
-        self._capture.set_pause(True)
+        self._capture.set_pause(True)  # pause the capture stream
 
         if self._cameraAPI == CAMERA_API_AVFOUNDATION:
             absStopTime = time.time()
@@ -1261,6 +1274,8 @@ class CameraDevice(BaseDevice):
         """
         if self._captureLib == 'ffpyplayer':
             return self._getFramesFFPyPlayer()
+        
+
 # class name alias for legacy support
 CameraInterface = CameraDevice
 
@@ -1552,6 +1567,9 @@ class Camera:
 
         # computer vison mode 
         self._objClassfiers = {}  # list of classifiers for CV mode
+
+        # keep track of files to merge
+        self._filesToMerge = []  # list of tuples (videoFile, audioFile)
 
         self.setWin(win)  # sets up OpenGL stuff if needed
 
@@ -2120,14 +2138,115 @@ class Camera:
         to save the frames to disk.
 
         """
+        self._closeMovieFileWriter()
+
+        self._capture.close()  # close the camera stream
+        self._capture = None  # clear the capture object
+
         if self.mic is not None:
             self.mic.close()
 
-        self._capture.close()  # close the camera stream
-
-        self._closeMovieFileWriter()
-
         self._isStarted = False
+
+    def _mergeAudioVideoTracks(self, videoTrackFile, audioTrackFile,
+                               filename, writerOpts=None):
+        """Use FFMPEG to merge audio and video tracks into a single file.
+        
+        Parameters
+        ----------
+        videoTrackFile : str
+            Path to the video track file to merge.
+        audioTrackFile : str
+            Path to the audio track file to merge.
+        filename : str
+            Path to the output file to save the merged audio and video tracks.
+        writerOpts : dict or None
+            Options to pass to the movie writer. If `None`, default options
+            will be used. This is useful for specifying the codec, bitrate,
+            etc. for the output file.
+
+        Returns
+        -------
+        str
+            Path to the output file with merged audio and video tracks.
+        
+        """
+        import subprocess as sp
+
+        # check if the video and audio track files exist
+        if not os.path.exists(videoTrackFile):
+            raise FileNotFoundError(
+                "Video track file `{}` does not exist.".format(videoTrackFile))
+        if not os.path.exists(audioTrackFile):
+            raise FileNotFoundError(
+                "Audio track file `{}` does not exist.".format(audioTrackFile))
+        
+        # check if the output file already exists
+        if os.path.exists(filename):
+            logging.warning(
+                "Output file `{}` already exists, it will be overwritten.".format(filename))
+            os.remove(filename)
+
+        # build the command to merge audio and video tracks
+        cmd = [
+            'ffmpeg', 
+            '-loglevel', 'error',  # suppress output except errors
+            '-nostdin',  # do not read from stdin
+            '-y',  # overwrite output file if it exists
+            '-i', videoTrackFile,  # input video track
+            '-i', audioTrackFile,  # input audio track
+            '-c:v', 'copy',  # copy video codec
+            '-c:a', 'aac',  # use AAC for audio codec
+            '-strict', 'experimental',  # allow experimental codecs
+            '-threads', 'auto',  # use all available threads
+            '-shortest'  # stop when the shortest input ends
+        ]
+        # add output file
+        cmd.append(filename)
+
+        # apply any writer options if provided
+        if writerOpts is not None:
+            for key, value in writerOpts.items():
+                if isinstance(value, str):
+                    cmd.append('-' + key)
+                    cmd.append(value)
+                elif isinstance(value, bool) and value:
+                    cmd.append('-' + key)
+                elif isinstance(value, (int, float)):
+                    cmd.append('-' + key)
+                    cmd.append(str(value))
+
+        logging.debug(
+            "Merging audio and video tracks with command: {}".format(' '.join(cmd))
+        )
+
+        # run the command to merge audio and video tracks
+        try:
+            proc = sp.Popen(
+                cmd, 
+                stdout=sp.PIPE, 
+                stderr=sp.PIPE, 
+                stdin=sp.DEVNULL if hasattr(sp, 'DEVNULL') else None,
+                universal_newlines=True,  # use text mode for output
+                text=True
+            )
+            proc.wait()  # wait for the process to finish
+            if proc.returncode != 0:
+                logging.error(
+                    "FFMPEG returned non-zero exit code {} for command: {}".format(
+                        proc.returncode, cmd
+                    )
+                )
+            # wait for the process to finish
+        except sp.CalledProcessError as e:
+            logging.error(
+                "Failed to merge audio and video tracks: {}".format(e))
+            return None
+        
+        logging.info(
+            "Merged audio and video tracks into `{}`".format(filename))
+
+        return filename
 
     def save(self, filename, useThreads=True, mergeAudio=True, writerOpts=None):
         """Save the last recording to file.
@@ -2199,31 +2318,38 @@ class Camera:
                 tempAudioFile.close()  # close the file so we can use it later
                 audioTrack.save(audioTrackFile)
 
-                # composite audio a video tracks using MoviePy (huge thanks to 
-                # that team)
-                from moviepy.video.io.VideoFileClip import VideoFileClip
-                from moviepy.audio.io.AudioFileClip import AudioFileClip
-                from moviepy.audio.AudioClip import CompositeAudioClip
+                # # composite audio a video tracks using MoviePy (huge thanks to 
+                # # that team)
+                # from moviepy.video.io.VideoFileClip import VideoFileClip
+                # from moviepy.audio.io.AudioFileClip import AudioFileClip
+                # from moviepy.audio.AudioClip import CompositeAudioClip
 
-                videoClip = VideoFileClip(videoTrackFile)
-                audioClip = AudioFileClip(audioTrackFile)
-                videoClip.audio = CompositeAudioClip([audioClip])
+                # videoClip = VideoFileClip(videoTrackFile)
+                # audioClip = AudioFileClip(audioTrackFile)
+                # videoClip.audio = CompositeAudioClip([audioClip])
 
-                # default options for the writer, needed or we can crash
-                moviePyOpts = {
-                    'logger': None
-                }
+                # # default options for the writer, needed or we can crash
+                # moviePyOpts = {
+                #     'logger': None
+                # }
 
-                if writerOpts is not None:  # make empty dict if not provided
-                    moviePyOpts.update(writerOpts)
+                # if writerOpts is not None:  # make empty dict if not provided
+                #     moviePyOpts.update(writerOpts)
 
-                # transcode with the format the user wants
-                videoClip.write_videofile(
-                    filename, 
-                    **moviePyOpts)  # expand out options
+                # # transcode with the format the user wants
+                # videoClip.write_videofile(
+                #     filename, 
+                #     **moviePyOpts)  # expand out options
 
-                videoClip.close()  # close the video clip
-                audioClip.close()
+                # videoClip.close()  # close the video clip
+                # audioClip.close()
+
+                # merge audio and video tracks using FFMPEG
+                mergedVideo = self._mergeAudioVideoTracks(
+                    videoTrackFile, 
+                   audioTrackFile, 
+                   filename, 
+                   writerOpts=writerOpts)
                 
                 os.remove(audioTrackFile)  # remove the temp file
 
@@ -2889,7 +3015,7 @@ class Camera:
             'pix_fmt_in': 'yuv420p',  # default for now using mp4
             'width_in': frameWidth,
             'height_in': frameHeight,
-            # 'codec': '',
+            'codec': 'libx264',
             'frame_rate': (int(self._capture.frameRate), 1)}
 
         self._curPTS = 0.0  # current pts for the movie writer
@@ -2902,7 +3028,11 @@ class Camera:
                 "writer.")
 
         self._movieWriter = MediaWriter(
-            filename, [writerOptions], libOpts=encoderOpts)
+            filename, 
+            [writerOptions], 
+            fmt='mp4',
+            overwrite=True,  # overwrite existing file
+            libOpts=encoderOpts)
 
     def _submitFrameToFileFFPyPlayer(self, frames):
         """Submit a frame to the movie file writer thread using FFPyPlayer.
@@ -2960,8 +3090,9 @@ class Camera:
         the writer. If the writer is not open, this will do nothing.
         """
         if self._movieWriter is not None:
+            logging.debug(
+                "Closing movie file writer using FFPyPlayer...")
             self._movieWriter.close()
-            self._movieWriter = None
         else:
             logging.debug(
                 "Attempting to call `_closeMovieFileWriterFFPyPlayer()` "
@@ -3045,6 +3176,10 @@ class Camera:
         ----------
         frames : MovieFrame
             Frame to submit to the movie file writer thread.
+        pts : float or None
+            Presentation timestamp for the frame. If `None`, timestamps will be
+            generated automatically by the movie file writer. This is only used
+            if the movie file writer is configured to generate PTS values.
 
         """
         if self._movieWriter is None:
@@ -3057,8 +3192,8 @@ class Camera:
             toReturn = self._submitFrameToFileFFPyPlayer(frames)
         else:
             raise ValueError(
-                "Invalid value for parameter `encoderLib`, expected one of "
-                "`'ffpyplayer'` or `'opencv'`.")
+                "Invalid value for parameter `encoderLib`, expected "
+                "`'ffpyplayer'.")
         
         logging.debug(
             "Submitted {} frames to the movie file writer (took {:.6f} seconds)".format(
@@ -3097,7 +3232,7 @@ class Camera:
         if hasattr(self, '_capture'):
             if self._capture is not None:
                 try:
-                    self._capture.close()
+                    self.close()
                 except AttributeError:
                     pass
 
