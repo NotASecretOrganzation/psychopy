@@ -112,6 +112,7 @@ docs = [
     "jinja2",
     "sphinx-design",
     "sphinx-copybutton",
+    "myst-parser",
     "sphinxcontrib.svg2pdfconverter",  # requires inkscape
     "psychopy-sphinx-theme",
 ]
