@@ -42,8 +42,10 @@ extensions = [
   'sphinx.ext.viewcode',
   'sphinx_design', 
   'sphinx_copybutton',
+  'myst_parser',
   'redirect',
   'sphinxcontrib.inkscapeconverter' # part of sphinxcontrib-svg2pdfconverter
+]
 
 autoclass_content = 'both'
 autosummary_generate = True
@@ -59,7 +61,10 @@ intersphinx_mapping = {
 templates_path = ['_templates']
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 # The encoding of source files.
 #source_encoding = 'utf-8'
