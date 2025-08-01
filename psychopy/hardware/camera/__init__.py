@@ -1504,6 +1504,7 @@ class Camera:
         self._frameCount = 0  # number of frames read from the camera stream
         self._frameStore = collections.deque(maxlen=keepFrames)
         self._usageMode = usageMode  # usage mode for the camera
+        self._unsaved = False  # is there any footage not saved?
 
         # other information
         self.name = name
@@ -2075,6 +2076,8 @@ class Camera:
         self._isRecording = True  # set recording flag
         # do an initial poll to avoid frame dropping
         self.update()
+        # mark that there's unsaved footage
+        self._unsaved = True
 
     def start(self, waitForStart=True):
         """Start the camera stream.
@@ -2166,6 +2169,10 @@ class Camera:
                 "Called `Camera.save()` while recording, stopping the "
                 "recording first."
             )
+        
+        # if there's nothing to unsaved, do nothing
+        if not self._unsaved:
+            return
         
         # check if we have an active movie writer
         if self._movieWriter is not None:
@@ -2261,6 +2268,8 @@ class Camera:
                 filename, time.time() - tStart))
 
         self._frameStore.clear()  # clear the frame store
+        # mark that there's no longer unsaved footage
+        self._unsaved = False
 
         self._lastVideoFile = filename  # store the last video file saved
 
