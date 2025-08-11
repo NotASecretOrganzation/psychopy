@@ -66,6 +66,9 @@ legacyParams = [
     "Audio latency priority",
 ]
 
+class SerializationError(Exception):
+    pass
+
 
 class Param():
     r"""Defines parameters for Experiment Components
@@ -403,11 +406,34 @@ class Param():
             self.plugin = "{}".format(data['plugin'])
     
     def toJSON(self):
+        def serializeCallable(func):
+            # if not callable, return as is
+            if not callable(func):
+                return func
+            # prepend this to the stringified output
+            preface = "python:///"
+            # get import path
+            path = f"{func.__module__}:{func.__qualname__}"
+            # if method is a local, we have a problem...
+            if "<locals>" in path:
+                logging.error(
+                    f"Param {self.label} contains a local method: {path}"
+                )
+
+            return preface + path
+        
         return {
             'val': self.val,
             'valType': self.valType,
-            'updates': "{}".format(self.updates),
-            'plugin': "{}".format(self.plugin)
+            'inputType': self.inputType,
+            'categ': self.categ,
+            'updates': self.updates,
+            'allowedUpdates': self.allowedUpdates,
+            'allowedVals': serializeCallable(self.allowedVals),
+            'allowedLabels': serializeCallable(self.allowedLabels),
+            'label': self.label,
+            'hint': self.hint,
+            'plugin': self.plugin
         }
     
     @property
