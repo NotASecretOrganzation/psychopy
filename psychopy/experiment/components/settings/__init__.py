@@ -786,7 +786,7 @@ class SettingsComponent:
         )
     
     @classmethod
-    def getJSON(cls):
+    def getTemplateJSON(cls):
         from psychopy.experiment import Experiment
         # include basic info
         profile = {
@@ -808,11 +808,24 @@ class SettingsComponent:
         # populate params
         for name in defaults.order:
             if name in defaults.params:
-                profile['params'][name] = defaults.params[name].toJSON()
+                profile['params'][name] = defaults.params[name].getTemplateJSON()
         for name, param in defaults.params.items():
             if name not in profile['params']:
-                profile['params'][name] = param.toJSON()
+                profile['params'][name] = param.getTemplateJSON()
 
+        return profile
+    
+    def getJSON(self):
+        # populate basic info
+        profile = {
+            'tag': type(self).__name__,
+            'plugin': self.plugin,
+            'params': {}
+        }
+        # populate params
+        for name, param in self.params.items():
+            profile['params'][name] = param.getJSON()
+        
         return profile
 
     @property
