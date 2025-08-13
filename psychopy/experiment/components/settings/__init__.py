@@ -784,6 +784,36 @@ class SettingsComponent:
             hint=_translate("What Python package should PsychoPy use to get keyboard input?"),
             label=_translate("Keyboard backend"), categ="Input"
         )
+    
+    @classmethod
+    def getJSON(cls):
+        from psychopy.experiment import Experiment
+        # include basic info
+        profile = {
+            '__class__': f"{cls.__module__}:{cls.__qualname__}",
+            '__name__': cls.__name__,
+            "categories": cls.categories,
+            "targets": cls.targets,
+            "plugin": cls.plugin,
+            "iconFile": cls.iconFile,
+            "tooltip": cls.tooltip,
+            "version": cls.version,
+            "beta": cls.beta,
+            "hidden": cls.hidden,
+            "params": {}
+        }
+        # make an object for defaults
+        exp = Experiment()
+        defaults = cls("", exp)
+        # populate params
+        for name in defaults.order:
+            if name in defaults.params:
+                profile['params'][name] = defaults.params[name].toJSON()
+        for name, param in defaults.params.items():
+            if name not in profile['params']:
+                profile['params'][name] = param.toJSON()
+
+        return profile
 
     @property
     def _xml(self):

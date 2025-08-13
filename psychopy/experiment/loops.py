@@ -27,6 +27,26 @@ from .components import getInitVals, getAllComponents
 
 
 class _BaseLoopHandler:
+    @classmethod
+    def getJSON(cls):
+        profile = {
+            '__class__': f"{cls.__module__}:{cls.__qualname__}",
+            '__name__': cls.__name__,
+            'params': {}
+        }
+        # make an object for defaults
+        from psychopy.experiment import Experiment
+        exp = Experiment()
+        defaults = cls("", exp)
+        # populate params
+        for name in defaults.order:
+            if name in defaults.params:
+                profile['params'][name] = defaults.params[name].toJSON()
+        for name, param in defaults.params.items():
+            if name not in profile['params']:
+                profile['params'][name] = param.toJSON()
+
+        return profile
 
     def writeInitCode(self, buff):
         # no longer needed - initialise the trial handler just before it runs
