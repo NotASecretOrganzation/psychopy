@@ -27,25 +27,42 @@ from .components import getInitVals, getAllComponents
 
 
 class _BaseLoopHandler:
+    plugin = None
+        
     @classmethod
-    def getJSON(cls):
+    def getTemplateJSON(cls):
+        from psychopy.experiment import Experiment
+        # include basic info
         profile = {
             '__class__': f"{cls.__module__}:{cls.__qualname__}",
             '__name__': cls.__name__,
-            'params': {}
+            "plugin": cls.plugin,
+            "params": {}
         }
         # make an object for defaults
-        from psychopy.experiment import Experiment
         exp = Experiment()
         defaults = cls("", exp)
         # populate params
         for name in defaults.order:
             if name in defaults.params:
-                profile['params'][name] = defaults.params[name].toJSON()
+                profile['params'][name] = defaults.params[name].getTemplateJSON()
         for name, param in defaults.params.items():
             if name not in profile['params']:
-                profile['params'][name] = param.toJSON()
+                profile['params'][name] = param.getTemplateJSON()
 
+        return profile
+    
+    def getJSON(self):
+        # populate basic info
+        profile = {
+            'tag': type(self).__name__,
+            'plugin': self.plugin,
+            'params': {}
+        }
+        # populate params
+        for name, param in self.params.items():
+            profile['params'][name] = param.getJSON()
+        
         return profile
 
     def writeInitCode(self, buff):
