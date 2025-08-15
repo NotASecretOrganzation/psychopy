@@ -1313,8 +1313,9 @@ class DlgLoopProperties(_BaseParamsDlg):
             row += 1
         panelSizer.AddGrowableCol(1, 1)
         self.globalCtrls['name'].valueCtrl.Bind(wx.EVT_TEXT, self.Validate)
-        self.Bind(wx.EVT_CHOICE, self.onTypeChanged,
-                  self.globalCtrls['loopType'].valueCtrl)
+        self.globalCtrls['loopType'].valueCtrl.Bind(
+            paramCtrls.EVT_PARAM_CHANGED, self.onTypeChanged,
+        )
         return panel
 
     def makeConstantsCtrls(self):
@@ -1588,7 +1589,7 @@ class DlgLoopProperties(_BaseParamsDlg):
         self.setCtrls(value)
 
     def onTypeChanged(self, evt=None):
-        newType = evt.GetString()
+        newType = self.globalCtrls['loopType'].valueCtrl.getValue()
         if newType == self.currentType:
             return
         self.setCtrls(newType)
