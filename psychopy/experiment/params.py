@@ -309,7 +309,6 @@ class Param():
                 for item in data.utils.listFromString(self.val):
                     item = str(Param(item, "file"))
                     output.append(item)
-                print("[{}]".format(",".join(output)))
                 return "[{}]".format(",".join(output))
             else:
                 valid, val = self.dollarSyntax()
