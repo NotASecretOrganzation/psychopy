@@ -17,6 +17,7 @@ from collections import OrderedDict
 import numpy
 import re
 import wx
+from wx.lib import scrolledpanel
 
 import psychopy.experiment.utils
 from psychopy.experiment import Param
@@ -428,9 +429,12 @@ class StartStopCtrls(wx.GridBagSizer):
 
 
 class ParamNotebook(wx.Notebook, handlers.ThemeMixin):
-    class CategoryPage(wx.Panel, handlers.ThemeMixin):
+    class CategoryPage(scrolledpanel.ScrolledPanel, handlers.ThemeMixin):
         def __init__(self, parent, dlg, params, categ=None):
             wx.Panel.__init__(self, parent, size=(600, -1))
+            self.SetupScrolling()
+            self.SetMaxSize((-1, 1080))
+            self.SetMinSize((720, 512))
             self.parent = parent
             self.parent = parent
             self.dlg = dlg
