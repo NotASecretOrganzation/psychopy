@@ -63,10 +63,27 @@ class CodeComponent(BaseComponent):
         super(CodeComponent, self).__init__(exp, parentName, name)
         self.type = 'Code'
         self.url = "https://www.psychopy.org/builder/components/code.html"
+
+        self.order += [
+            "Code Type",
+            "disabled",
+            "Before Experiment",
+            "Begin Experiment",
+            "Begin Routine",
+            "Each Frame",
+            "End Routine",
+            "End Experiment",
+            "Before JS Experiment",
+            "Begin JS Experiment",
+            "Begin JS Routine",
+            "Each JS Frame",
+            "End JS Routine",
+            "End JS Experiment"
+        ]
+
         # params
         if not codeType:
             codeType = prefs.builder['codeComponentLanguage']
-
         msg = _translate("Display Python or JS Code")
         self.params['Code Type'] = Param(
             codeType, valType='str', inputType="choice", categ="Basic",
