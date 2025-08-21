@@ -112,9 +112,6 @@ class EyeTracker(EyeTrackerDevice):
         #
         self._latest_gaze_position = None
 
-        self.setConnectionState(True)
-        self.setRecordingState(True)
-
     def _connectMouse(self):
         if self._iohub_server:
             for dev in self._iohub_server.devices:
