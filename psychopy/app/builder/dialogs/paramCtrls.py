@@ -1672,6 +1672,23 @@ class DeviceCtrl(ChoiceCtrl):
             self.deviceMgrBtn, border=6, flag=wx.EXPAND | wx.LEFT
         )
 
+    def populate(self):
+        self.choices = []
+        self.labels = []
+        for name, device in prefs.devices.items():
+            # get backends from allowedVals
+            for backend in self.param.allowedVals:
+                # if device is the correct type, include it
+                if isinstance(device, backend):
+                    self.choices.append(name)
+                    self.labels.append(name)
+        # apply to ctrl
+        self.ctrl.SetItems(self.labels)
+        # disable if param is readonly
+        self.ctrl.Enable(not self.param.readOnly)
+        # apply (or re-apply) selection
+        self.setValue(self.param.val)
+    
     def openDeviceManager(self, evt=None):
         from psychopy.app.deviceManager import DeviceManagerDlg
         # create dialog
