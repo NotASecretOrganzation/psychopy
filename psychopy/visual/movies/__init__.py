@@ -1048,7 +1048,7 @@ class MovieFileReader:
         if self._player is None:
             return
 
-        self._player.set_volume(float(volume))
+        self._player.set_volume(volume)
 
     def setVolume(self, volume):
         """Set the volume of the movie player.
@@ -1061,6 +1061,10 @@ class MovieFileReader:
         """
         if self._player is None:
             return
+        
+        volume = min(1.0, max(0.0, float(volume)))
+        
+        logging.debug("Setting movie volume to: {}".format(volume))
 
         if self._decoderLib == 'ffpyplayer':
             self._setVolumeFFPyPlayer(volume)
