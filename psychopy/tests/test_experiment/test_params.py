@@ -27,6 +27,7 @@ class TestStyle:
         'surveyjs': "SurveyJS",
         # other brand names
         'python': "Python",
+        'py': "Py",
         'excel': "Excel",
         'gazepoint': "GazePoint",
         'eyelink': "EyeLink",
@@ -39,7 +40,7 @@ class TestStyle:
         'html': "HTML",
         'js': "JS",
         'ip': "IP",
-        'rt': "RT",
+        'rt': "RT"
     }
     # add sentence start versions
     for kw in keywords.copy():
