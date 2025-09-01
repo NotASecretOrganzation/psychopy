@@ -27,7 +27,7 @@ class TestStyle:
         'surveyjs': "SurveyJS",
         # other brand names
         'python': "Python",
-        'py': "Py",
+        '(py)': "(Py)",
         'excel': "Excel",
         'gazepoint': "GazePoint",
         'eyelink': "EyeLink",
@@ -39,6 +39,7 @@ class TestStyle:
         'url': "URL",
         'html': "HTML",
         'js': "JS",
+        '(js)': "(JS)",
         'ip': "IP",
         'rt': "RT"
     }
