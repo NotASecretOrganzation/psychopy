@@ -453,6 +453,30 @@ class MultiLineCtrl(SingleLineCtrl):
     ctrlStyle = wx.TE_LEFT | wx.TE_MULTILINE
 
 
+class HiddenCtrl(BaseParamCtrl):
+    inputType = "hidden"
+
+    _value = None
+
+    def makeCtrls(self):
+        """
+        Makes the actual control object.
+        """
+        self.ctrl = None
+    
+    def getValue(self):
+        """
+        Returns the value of this ctrl
+        """
+        return self._value
+
+    def setValue(self, value):
+        """
+        Returns the value of this ctrl
+        """
+        self._value = value
+
+
 class InvalidCtrl(SingleLineCtrl):
     inputType = "inv"
 
