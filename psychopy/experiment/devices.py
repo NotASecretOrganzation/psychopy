@@ -75,7 +75,7 @@ class DeviceBackend:
         self.order = []
         # add a param for the device label to all backends
         self.params['deviceLabel'] = Param(
-            "", valType="str", inputType="name",
+            "", valType="str", inputType="name", categ=None,
             label=_translate("Device label"),
             hint=_translate(
                 "A name to refer to this device by in Device Manager."

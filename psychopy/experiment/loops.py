@@ -41,7 +41,7 @@ class _BaseLoopHandler:
         }
         # make an object for defaults
         exp = Experiment()
-        defaults = cls("", exp)
+        defaults = cls(exp)
         # order params
         order = [
             name for name in defaults.order if name in defaults.params
@@ -113,7 +113,7 @@ class TrialHandler(_BaseLoopHandler):
             (e.g. generating a psychopy TrialHandler or StairHandler).
             """
 
-    def __init__(self, exp, name, loopType='random', nReps=5,
+    def __init__(self, exp, name="trials", loopType='random', nReps=5,
                  conditions=(), conditionsFile='', endPoints=(0, 1),
                  randomSeed='', selectedRows='', isTrials=True):
         """
@@ -143,7 +143,7 @@ class TrialHandler(_BaseLoopHandler):
         ]
         self.params = {}
         self.params['name'] = Param(
-            name, valType='code', inputType="name", updates=None, allowedUpdates=None,
+            name, valType='code', inputType="name", updates=None, allowedUpdates=None, categ=None,
             label=_translate('Name'),
             hint=_translate("Name of this loop"))
         self.params['nReps'] = Param(
@@ -194,7 +194,7 @@ class TrialHandler(_BaseLoopHandler):
                             "have a new random sequence on each run of the "
                             "experiment."))
         self.params['isTrials'] = Param(
-            isTrials, valType='bool', inputType="bool", updates=None, allowedUpdates=None,
+            isTrials, valType='bool', inputType="bool", updates=None, allowedUpdates=None, categ=None,
             label=_translate("Is trials"),
             hint=_translate("Indicates that this loop generates TRIALS, "
                             "rather than BLOCKS of trials or stimuli within "
@@ -511,7 +511,7 @@ class StairHandler(_BaseLoopHandler):
     """A staircase experimental control object.
     """
 
-    def __init__(self, exp, name, nReps='50', startVal='', nReversals='',
+    def __init__(self, exp, name="stair", nReps='50', startVal='', nReversals='',
                  nUp=1, nDown=3, minVal=0, maxVal=1,
                  stepSizes='[4,4,2,2,1]', stepType='db', endPoints=(0, 1),
                  isTrials=True):
@@ -540,7 +540,7 @@ class StairHandler(_BaseLoopHandler):
         self.children = []
         self.params = {}
         self.params['name'] = Param(
-            name, valType='code', inputType="name",
+            name, valType='code', inputType="name", categ=None,
             hint=_translate("Name of this loop"),
             label=_translate('Name'))
         self.params['nReps'] = Param(
@@ -587,7 +587,7 @@ class StairHandler(_BaseLoopHandler):
             hint=_translate("Minimum number of times the staircase must "
                             "change direction before ending"))
         self.params['isTrials'] = Param(
-            isTrials, valType='bool', inputType='bool', updates=None, allowedUpdates=None,
+            isTrials, valType='bool', inputType='bool', updates=None, allowedUpdates=None, categ=None,
             label=_translate("Is trials"),
             hint=_translate("Indicates that this loop generates TRIALS, "
                             "rather than BLOCKS of trials or stimuli within"
@@ -678,7 +678,7 @@ class MultiStairHandler(_BaseLoopHandler):
     """To handle multiple interleaved staircases
     """
 
-    def __init__(self, exp, name, nReps='50', stairType='simple',
+    def __init__(self, exp, name="stair", nReps='50', stairType='simple',
                  switchStairs='random',
                  conditions=(), conditionsFile='', endPoints=(0, 1),
                  isTrials=True):
@@ -702,7 +702,7 @@ class MultiStairHandler(_BaseLoopHandler):
         self.params = {}
         self.depends = []
         self.params['name'] = Param(
-            name, valType='code', inputType='name',
+            name, valType='code', inputType='name', categ=None,
             label=_translate('Name'),
             hint=_translate("Name of this loop"))
         self.params['nReps'] = Param(
