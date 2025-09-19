@@ -94,7 +94,7 @@ How is PsychoPy Free?
     
     .. grid-item::
 
-        .. image:: _static/ost_logotext_tight.svg
+        .. image:: _static/ost_logotext_tight.*
             :width: 420
             :alt: Open Science Tools logo
             :align: right
