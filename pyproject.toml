@@ -2,7 +2,7 @@
 [project]
 name = "psychopy"
 dynamic = ["version"]
-requires-python = ">=3.8, <3.12"
+requires-python = ">=3.9, <3.12"
 description = "PsychoPy provides easy, precise, flexible experiments in behavioural sciences"
 readme ={file = "README.md", content-type = "text/markdown"}
 authors = [
@@ -17,7 +17,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
