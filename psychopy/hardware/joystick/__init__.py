@@ -513,7 +513,8 @@ class Joystick:
         ----------
         evt : str
             The event type to listen for (e.g., 'on_joybutton_press',
-            'on_joybutton_release', 'on_joyaxis_motion', etc.).
+            'on_joybutton_release', 'on_joyaxis_motion', etc.). The name used 
+            depends on the backend.
         callback : callable or None
             The callback function to be called when a joystick event occurs. 
             If None, the event handler is removed.
