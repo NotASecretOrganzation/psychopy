@@ -72,14 +72,6 @@ class JoystickInterfacePyglet(BaseJoystickInterface):
         except pyglet_input.DeviceOpenException as e:
             pass
 
-        if len(visual.openWindows) == 0:
-            logging.error(
-                "You need to open a window before creating your joystick")
-        else:
-           for _win in visual.openWindows:
-               _win()._eventDispatchers.append(pyglet_dispatcher)
-               _win()._eventDispatchers = list(set(_win()._eventDispatchers))
-
     @staticmethod
     def getAvailableDevices():
         """Return a list of available joystick devices.
@@ -127,8 +119,15 @@ class JoystickInterfacePyglet(BaseJoystickInterface):
         self._isOpen = True
 
         # register with pyglet event loop
-        for _win in visual.openWindows:
-            _win()._eventDispatchers.append(pyglet_dispatcher)
+        if len(visual.openWindows) == 0:
+            logging.error(
+                "You need to open a window before creating your joystick " \
+                "interface when using the 'pyglet' backend.")
+        else:
+           for _win in visual.openWindows:
+               _win()._eventDispatchers.append(pyglet_dispatcher)
+               # invoke setter again as suggested by user `fboers`
+               _win()._eventDispatchers = list(set(_win()._eventDispatchers))
 
     @property
     def isOpen(self):
@@ -150,7 +149,8 @@ class JoystickInterfacePyglet(BaseJoystickInterface):
         ----------
         evt : str
             The event type to listen for (e.g., 'on_joybutton_press',
-            'on_joybutton_release', 'on_joyaxis_motion', etc.).
+            'on_joybutton_release', 'on_joyaxis_motion', etc.). The name used 
+            depends on the backend.
         callback : callable or None
             The callback function to be called when a joystick event occurs. 
             If None, the event handler is removed.
