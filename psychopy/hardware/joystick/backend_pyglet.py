@@ -76,8 +76,9 @@ class JoystickInterfacePyglet(BaseJoystickInterface):
             logging.error(
                 "You need to open a window before creating your joystick")
         else:
-           for win in visual.openWindows:
-               win()._eventDispatchers.append(pyglet_dispatcher)
+           for _win in visual.openWindows:
+               _win()._eventDispatchers.append(pyglet_dispatcher)
+               _win()._eventDispatchers = list(set(_win()._eventDispatchers))
 
     @staticmethod
     def getAvailableDevices():
@@ -125,6 +126,10 @@ class JoystickInterfacePyglet(BaseJoystickInterface):
         self._device.open()
         self._isOpen = True
 
+        # register with pyglet event loop
+        for _win in visual.openWindows:
+            _win()._eventDispatchers.append(pyglet_dispatcher)
+
     @property
     def isOpen(self):
         """Check if the joystick device is open.
@@ -137,6 +142,22 @@ class JoystickInterfacePyglet(BaseJoystickInterface):
         """
         # return self._device.device.is_open
         return self._isOpen
+    
+    def setEventCallback(self, evt, callback):
+        """Set a callback function to be called when a joystick event occurs.
+
+        Parameters
+        ----------
+        evt : str
+            The event type to listen for (e.g., 'on_joybutton_press',
+            'on_joybutton_release', 'on_joyaxis_motion', etc.).
+        callback : callable or None
+            The callback function to be called when a joystick event occurs. 
+            If None, the event handler is removed.
+
+        """
+        kwargs = {evt: callback}
+        self._device.push_handlers(**kwargs)
 
     def close(self):
         """Close the joystick device.
