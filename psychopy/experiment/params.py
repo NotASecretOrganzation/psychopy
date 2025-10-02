@@ -411,6 +411,8 @@ class Param():
         )
         # apply
         param.applyJSON(data)
+        
+        return param
     
     def applyJSON(self, data):
         if "val" in data:
