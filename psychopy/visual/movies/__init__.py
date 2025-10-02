@@ -1401,7 +1401,8 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
             self._extractAudioTrack()
             disableAudio = True
 
-        self._decoderOpts['an'] = disableAudio  
+
+        self._decoderOpts['an'] = disableAudio
 
         # Setup looping if the user has requested it. This is done by setting the
         # `loop` option in the decoder options so FFMPEG will loop the movie 
@@ -1443,6 +1444,9 @@ class MovieStim(BaseVisualStim, DraggingMixin, ColorMixin, ContainerMixin):
         self._pts = 0.0  # reset presentation timestamp
         self._movieTime = 0.0  # reset movie time
         self._isLoaded = True
+
+        # set the volume to previous 
+        self.volume = self._volume
 
     def _setupAudioStream(self):
         """Setup the audio stream for the movie.
