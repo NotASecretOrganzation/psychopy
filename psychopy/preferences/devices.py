@@ -61,10 +61,13 @@ class DeviceConfig(dict):
         # apply
         for key, val in data.items():
             # get class from stored data
-            mod = ".".join(
-                val['__class__'].split(".")[:-1]
-            )
-            name = val['__class__'].split(".")[-1]
+            if ":" in val['__class__']:
+                mod, name =  val['__class__'].split(":", 1)
+            else:
+                mod = ".".join(
+                    val['__class__'].split(".")[:-1]
+                )
+                name = val['__class__'].split(".")[-1]
             cls = getattr(importlib.import_module(mod), name)
             # initialise class with profile from stored data
             self[key] = cls.fromJSON(val)
