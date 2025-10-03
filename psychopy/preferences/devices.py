@@ -51,6 +51,9 @@ class DeviceConfig(dict):
         self.clear()
         # store file path
         self.file = Path(file)
+        # make sure file exists
+        if not self.file.is_file():
+            self.file.write_text("{}", encoding="utf-8")
         # read file
         data = json.loads(
             self.file.read_text()
@@ -59,9 +62,9 @@ class DeviceConfig(dict):
         for key, val in data.items():
             # get class from stored data
             mod = ".".join(
-                val['__cls__'].split(".")[:-1]
+                val['__class__'].split(".")[:-1]
             )
-            name = val['__cls__'].split(".")[-1]
+            name = val['__class__'].split(".")[-1]
             cls = getattr(importlib.import_module(mod), name)
             # initialise class with profile from stored data
             self[key] = cls.fromJSON(val)
