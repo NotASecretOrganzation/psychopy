@@ -1759,3 +1759,21 @@ class DeviceCtrl(ChoiceCtrl):
                     prefs.devices[device.name] = device
                     prefs.devices.save()
                     self.populate()
+
+
+class ValidatorCtrl(ChoiceCtrl):
+    inputType = "validator"
+    
+    def populate(self):
+        # if we don't have an element, leave unpopulated (we should always have an element for validator ctrls)
+        if self.element is None:
+            return
+        # get choices and labels from element's validator methods
+        self.choices = self.element.getAllValidatorRoutines(attr="vals")
+        self.labels = self.element.getAllValidatorRoutines(attr="labels")
+        # apply to ctrl
+        self.ctrl.SetItems(self.labels)
+        # disable if param is readonly
+        self.ctrl.Enable(not self.param.readOnly)
+        # apply (or re-apply) selection
+        self.setValue(self.param.val)
