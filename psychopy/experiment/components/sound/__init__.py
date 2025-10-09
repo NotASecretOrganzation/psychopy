@@ -137,6 +137,12 @@ class SoundComponent(BaseDeviceComponent):
         )
 
     def writeInitCode(self, buff):
+        # set sound backend (only once per exp)
+        code = (
+            "# set audio backend\n"
+            "sound.Sound.backend = %(Audio lib)s\n"
+        )
+        buff.writeOnceIndentedLines(code % self.exp.settings.params)
         # replaces variable params with sensible defaults
         inits = getInitVals(self.params)
         if not canBeNumeric(inits['stopVal'].val):
