@@ -63,7 +63,7 @@ class DeviceBackend:
     # icon to use for this backend (relative to current file path, leave as None for no icon)
     icon = None
     # class of the device which this backend corresponds to
-    deviceClass = "psychopy.hardware.base.BaseDevice"
+    deviceClass = None
 
     plugin = None
       
@@ -100,6 +100,8 @@ class DeviceBackend:
         profile = {
             '__class__': f"{cls.__module__}:{cls.__qualname__}",
             '__name__': cls.__name__,
+            'label': cls.backendLabel,
+            'device': cls.deviceClass,
             'plugin': cls.plugin,
             'profile': {},
             'params': {}
@@ -120,6 +122,12 @@ class DeviceBackend:
             )
 
         return profile
+    
+    @classmethod
+    def getAvailableDevices(cls):
+        from psychopy.hardware import DeviceManager
+
+        return DeviceManager.getAvailableDevices(cls.deviceClass)
     
     def getParams(self):
         """
@@ -209,7 +217,10 @@ class DeviceBackend:
         self.profile = data['profile']
         # apply param vals
         for name, val in data['params'].items():
-            self.params[name].applyJSON(val)
+            if name in self.params:
+                self.params[name].applyJSON(val)
+            elif name == "name":
+                self.params['deviceLabel'].applyJSON(val)
     
     def toJSON(self):
         """
@@ -221,19 +232,21 @@ class DeviceBackend:
             JSON dict representing this object, will be in the form:..
 
             {
-                '__cls__': <import string for this class>,
+                '__class__': <import string for this class>,
                 'profile': <dict from DeviceManager.getAvailableDevices>,
                 'params': <dict of Param JSON objects>,
             }
         """
         # create dict
         data = {
-            '__cls__': f"{type(self).__module__}.{type(self).__name__}",
+            '__class__': f"{type(self).__module__}.{type(self).__name__}",
             'profile': self.profile,
             'params': {}
         }
         # add params
         for key, param in self.params.items():
+            if key == "deviceLabel":
+                key = "name"
             data['params'][key] = param.toJSON()
         
         return data
@@ -265,7 +278,10 @@ class DeviceBackend:
                 allBackends.append(cls)
 
         return allBackends
-        
+    
+    @staticmethod
+    def getBackendProfiles():
+        return [cls.getTemplateJSON() for cls in DeviceBackend.getAllBackends()]
     
     def writeBaseDeviceCode(self, buff, close=False):
         """
