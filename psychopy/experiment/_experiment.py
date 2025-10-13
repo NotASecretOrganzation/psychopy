@@ -292,9 +292,15 @@ class Experiment:
     def writeScript(self, expPath=None, target="PsychoPy", modular=True):
         """Write a PsychoPy script for the experiment
         """
-        # self.integrityCheck()
-
-        self.psychopyVersion = psychopy.__version__  # make sure is current
+        expPath = Path(expPath)
+        # transform expPath from psyexp to py/js if needed
+        if expPath.suffix == ".psyexp":
+            if target == "PsychoPy":
+                expPath = expPath.parent / (expPath.stem + ".py")
+            if target == "PsychoJS":
+                expPath = expPath.parent / (expPath.stem + ".py")
+        # make sure is current
+        self.psychopyVersion = psychopy.__version__
         # set this so that params write for approp target
         utils.scriptTarget = target
         self.expPath = expPath
