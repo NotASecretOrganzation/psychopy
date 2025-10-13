@@ -298,12 +298,12 @@ class Experiment:
             if target == "PsychoPy":
                 expPath = expPath.parent / (expPath.stem + ".py")
             if target == "PsychoJS":
-                expPath = expPath.parent / (expPath.stem + ".py")
+                expPath = expPath.parent / (expPath.stem + ".js")
         # make sure is current
         self.psychopyVersion = psychopy.__version__
         # set this so that params write for approp target
         utils.scriptTarget = target
-        self.expPath = expPath
+        self.expPath = str(expPath)
         script = IndentingBuffer(target=target)  # a string buffer object
 
         # get date info, in format preferred by current locale as set by app:
