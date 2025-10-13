@@ -1614,7 +1614,8 @@ class DictCtrl(BaseParamCtrl):
                 self.parent.items.index(self)
             )
             # clear any warnings
-            self.clearWarning()
+            self.keyCtrl.clearWarning()
+            self.valueCtrl.clearWarning()
             # remove all windows from parent sizer
             self.parent.itemsSizer.Detach(self.keyCtrl)
             self.parent.itemsSizer.Detach(self.valueCtrl)
