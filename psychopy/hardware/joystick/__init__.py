@@ -266,6 +266,7 @@ class Joystick:
 
         """
         # use the selected backend class to get the available devices
+        global backend
         return getJoystickInterfaces()[backend].getAvailableDevices()
 
     @property
