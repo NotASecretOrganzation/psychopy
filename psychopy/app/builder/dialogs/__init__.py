@@ -612,10 +612,10 @@ class ParamNotebook(wx.Notebook, handlers.ThemeMixin):
         paramsByCateg = OrderedDict()
         for name, param in self.params.items():
             # Add categ if not present
-            if param.categ not in paramsByCateg:
-                paramsByCateg[param.categ] = OrderedDict()
+            if (param.categ or "Basic") not in paramsByCateg:
+                paramsByCateg[param.categ or "Basic"] = OrderedDict()
             # Append param to categ
-            paramsByCateg[param.categ][name] = param
+            paramsByCateg[param.categ or "Basic"][name] = param
         # Move high priority categs to the front
         for categ in reversed(['Basic', 'Layout', 'Appearance', 'Formatting', 'Texture']):
             if categ in paramsByCateg:
