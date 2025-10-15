@@ -293,7 +293,7 @@ class Experiment:
         """Write a PsychoPy script for the experiment
         """
         # sanitize and store expPath
-        if expPath:
+        if expPath is not None:
             # if there is an expPath, convert it to a Path
             expPath = Path(expPath)
             # transform expPath from psyexp to py/js if needed
