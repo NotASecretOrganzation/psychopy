@@ -79,7 +79,7 @@ class SoundComponent(BaseDeviceComponent):
         hnt = _translate("A sound can be a note name (e.g. A or Bf), a number"
                          " to specify Hz (e.g. 440) or a filename")
         self.params['sound'] = Param(
-            sound, valType='str', inputType="soundFile", allowedTypes=[], updates='constant', categ='Basic',
+            sound, valType='str', inputType="soundFile", allowedTypes=[], updates='set every repeat', categ='Basic',
             allowedUpdates=['set every repeat'],
             hint=hnt,
             label=_translate("Sound"))
