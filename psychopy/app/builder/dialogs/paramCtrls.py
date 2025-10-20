@@ -283,7 +283,7 @@ class SingleLineCtrl(BaseParamCtrl):
         )
         # show/hide dollar according to valType
         self.dollarLbl.Show(
-            self.param.valType in ("code", "extendedCode", "num", "list", "int", "fixedList")
+            self.param.valType in ("code", "extendedCode")
         )
         # add value ctrl
         self.ctrl = wx.TextCtrl(
