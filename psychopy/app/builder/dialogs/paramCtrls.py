@@ -410,6 +410,10 @@ class SingleLineCtrl(BaseParamCtrl):
                 self.setValue(
                     re.sub(r"(?<!\\)[\u201c\u201d]", "\"", self.getValue())
                 )
+            if re.findall(r"(?<!\\)[\u2018\u2019]", self.getValue()):
+                self.setValue(
+                    re.sub(r"(?<!\\)[\u2018\u2019]", "\'", self.getValue())
+                )
         else:
             pass
 
@@ -429,7 +433,12 @@ class NameCtrl(SingleLineCtrl):
         # start off valid
         BaseParamCtrl.validate(self)
         # is name a valid name?
-        if NameSpace.isValid(self.getValue()):
+        if self.getValue() == "":
+            # prompt to enter a name if blank
+            self.setWarning(_translate(
+                "Please enter a name"
+            ), allowed=False)
+        elif NameSpace.isValid(self.getValue()):
             # if we have an experiment, is the name used already?
             if self.element:
                 # if unchanged from original name, it does exist but is valid
@@ -844,15 +853,15 @@ class TableCtrl(FileCtrl):
         """
         Either open the specified excel sheet, or make a new one from a template
         """
+        file = Path(self.getValue())
         # make path absolute
         if not file.is_absolute():
             file = self.rootDir / file
         # open a template if not a valid file
-        if not (file.is_file() or file.suffix not in self.validExt):
+        if file == self.rootDir or not (file.is_file() or file.suffix not in self.validExt):
             dlg = wx.MessageDialog(self, _translate(
-                    "Once you have created and saved your table,"
-                    "please remember to add it to {name}"
-                ).format(name=_translate(self.Name)),
+                    "Once you have created and saved your table, remember to add it here."
+                ),
                 caption=_translate("Reminder")
             )
             dlg.ShowModal()
@@ -1102,13 +1111,13 @@ class FontCtrl(SingleLineCtrl):
             # download if yes
             if dlg.ShowModal() == wx.ID_YES:
                 try:
-                    fm.addGoogleFont(self.GetValue().strip())
+                    fm.addGoogleFont(self.getValue().strip())
                 except MissingFontError as err:
                     dlg = wx.MessageDialog(
                         self.GetTopLevelParent(),
                         _translate(
                             "Could not download font {} from Google Fonts, reason: {}"
-                        ).format(self.GetValue(), err),
+                        ).format(self.getValue(), err),
                         style=wx.OK|wx.ICON_ERROR
                     )
                     dlg.ShowModal()
@@ -1372,6 +1381,9 @@ class RichChoiceCtrl(BaseParamCtrl):
 class FileListCtrl(BaseParamCtrl):
     inputType = "fileList"
 
+    dlgWildcard = "All Files (*.*)|*.*"
+    dlgStyle = wx.FD_FILE_MUST_EXIST
+
     class FileListItem(FileCtrl):
         def makeCtrls(self):
             FileCtrl.makeCtrls(self)
@@ -1414,6 +1426,15 @@ class FileListCtrl(BaseParamCtrl):
         self.sizer.Add(
             self.itemsSizer, border=6, proportion=1, flag=wx.EXPAND | wx.BOTTOM
         )
+        # add multiple button
+        self.addManyBtn = wx.Button(self, label=_translate("Add multiple items"))
+        self.addManyBtn.SetBitmap(
+            icons.ButtonIcon("add_many", size=16, theme="light").bitmap
+        )
+        self.sizer.Add(
+            self.addManyBtn, border=6, flag=wx.ALIGN_LEFT | wx.BOTTOM
+        )
+        self.addManyBtn.Bind(wx.EVT_BUTTON, self.addMultiItems)
         # add button
         self.addBtn = wx.Button(self, label=_translate("Add item"))
         self.addBtn.SetBitmap(
@@ -1458,6 +1479,48 @@ class FileListCtrl(BaseParamCtrl):
 
         return item
     
+    def addMultiItems(self, evt=None):
+        """
+        Add several new items to this ctrl
+        """
+        items = []
+        # open a file browser dialog
+        dlg = wx.FileDialog(
+            self, 
+            message=_translate("Specify file..."), 
+            defaultDir=str(self.rootDir),
+            style=wx.FD_OPEN | wx.FD_MULTIPLE | self.dlgStyle,
+            wildcard=self.dlgWildcard,
+        )
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        # get path
+        for file in dlg.GetPaths():
+            # relativise
+            try:
+                filename = Path(file).relative_to(self.rootDir)
+            except ValueError:
+                filename = Path(file).absolute()
+            # make a file control for a param not attached to anything
+            item = self.FileListItem(
+                parent=self, 
+                field=str(len(self.items)),
+                param=Param(str(filename).replace("\\", "/"), valType="str", inputType="file"),
+                element=self.element,
+                warnings=self.warnings
+            )
+            items.append(item)
+            # append it to items array
+            self.items.append(item)
+            # add it to the items sizer
+            self.itemsSizer.Add(
+                item, border=6, flag=wx.EXPAND | wx.BOTTOM
+            )
+
+        self.layout()
+
+        return items
+    
     def clearItems(self):
         """
         Clear all items from this ctrl
@@ -1491,6 +1554,19 @@ class FileListCtrl(BaseParamCtrl):
     def validate(self):
         for item in self.items:
             item.validate()
+    
+    @property
+    def rootDir(self):
+        # if no element, use system root
+        if self.element is None or not hasattr(self.element, "exp"):
+            return Path()
+        # otherwise, get from experiment
+        root = Path(self.element.exp.filename)
+        # move up a dir if root is a file
+        if root.is_file():
+            root = root.parent
+        
+        return root
 
 
 class DictCtrl(BaseParamCtrl):
@@ -1572,7 +1648,8 @@ class DictCtrl(BaseParamCtrl):
                 self.parent.items.index(self)
             )
             # clear any warnings
-            self.clearWarning()
+            self.keyCtrl.clearWarning()
+            self.valueCtrl.clearWarning()
             # remove all windows from parent sizer
             self.parent.itemsSizer.Detach(self.keyCtrl)
             self.parent.itemsSizer.Detach(self.valueCtrl)

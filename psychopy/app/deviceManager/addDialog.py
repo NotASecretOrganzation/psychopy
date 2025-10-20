@@ -102,9 +102,10 @@ class AddDeviceDlg(wx.Dialog):
             if item.Window is not None and item.Window.GetId() == wx.ID_OK:
                 self.okBtn = item.Window
         self.Layout()
-
         # queue populate command
         self.Bind(wx.EVT_IDLE, self.populateAsync)
+        # start off with focus on name field
+        self.nameCtrl.SetFocus()
 
     def validate(self, evt=None):
         self.okBtn.Enable(
@@ -156,10 +157,6 @@ class AddDeviceDlg(wx.Dialog):
         self.devicesLoadingLbl.Hide()
         self.devicesCtrl.Show()
         self.Layout()
-    
-    def __del__(self):
-        # imageList has to be deleted manually due to garbage collection bug in TreeCtrl
-        del self.imageList
 
     def populateAsync(self, evt):
         """
@@ -194,6 +191,9 @@ class AddDeviceDlg(wx.Dialog):
 
     def onSelectItem(self, evt):
         evt.Skip()
+        # this event is triggered on deletion due to a bug in wx.TreeCtrl, so catch it
+        if not self.devicesCtrl:
+            return
         # get id of selected profile and its parent
         item = self.devicesCtrl.GetSelection()
         branch = self.devicesCtrl.GetItemParent(item)
