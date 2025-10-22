@@ -149,35 +149,61 @@ class VisualValidatorRoutine(BaseValidatorRoutine, PluginDevicesMixin):
                 "from other light sensors on the same port. Leave blank to use the first light sensor "
                 "which can detect the Window."
             )
-        )     
-
-    def writeMainCode(self, buff):
-        inits = getInitVals(self.params)
-        # get Sensor
-        code = (
-            "# sensor object for %(name)s\n"
-            "%(name)sSensor = deviceManager.getDevice(%(deviceLabel)s)\n"
         )
-        buff.writeIndentedLines(code % inits)
+
+    def writeDeviceCode(self, buff):
+        """
+        Code to setup the CameraDevice for this component.
+
+        Parameters
+        ----------
+        buff : io.StringIO
+            Text buffer to write code to.
+        """
+        # do usual backend-specific device code writing
+        PluginDevicesMixin.writeDeviceCode(self, buff)
+        # get inits
+        inits = getInitVals(self.params)
+        # get device handle
+        code = (
+            "%(deviceLabelCode)s = deviceManager.getDevice(%(deviceLabel)s)"
+        )
+        buff.writeOnceIndentedLines(code % inits)
         # find threshold if indicated
-        if self.params['findThreshold'] or not self.params['threshold']:
+        if self.params['findThreshold']:
             code = (
                 "# find threshold for light sensor\n"
-                "%(name)sSensor.findThreshold(win, channel=%(channel)s)\n"
+                "%(deviceLabelCode)s.findThreshold(win, channel=%(channel)s)\n"
             )
         else:
             code = (
-                "%(name)sSensor.setThreshold(%(threshold)s, channel=%(channel)s)"
+                "%(deviceLabelCode)s.setThreshold(%(threshold)s, channel=%(channel)s)"
             )
         buff.writeOnceIndentedLines(code % inits)
         # find pos if indicated
         if self.params['findSensor']:
             code = (
                 "# find position and size of the light sensor\n"
-                "%(name)sSensor.findSensor(win, channel=%(channel)s)\n"
+                "%(deviceLabelCode)s.findSensor(win, channel=%(channel)s)\n"
             )
             buff.writeOnceIndentedLines(code % inits)
-        else:
+
+    def writeMainCode(self, buff):
+        inits = getInitVals(self.params)
+        # get Sensor
+        code = (
+            "# Sensor object for %(name)s\n"
+            "%(name)sSensor = deviceManager.getDevice(%(deviceLabel)s)\n"
+        )
+        buff.writeIndentedLines(code % inits)
+
+        if self.params['threshold'] and not self.params['findThreshold']:
+            code = (
+                "%(name)sSensor.setThreshold(%(threshold)s, channel=%(channel)s)\n"
+            )
+            buff.writeIndentedLines(code % inits)
+        # find/set Sensor position
+        if not self.params['findSensor']:
             code = ""
             # set units (unless None)
             if self.params['sensorUnits']:
