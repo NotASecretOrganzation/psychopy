@@ -30,7 +30,7 @@ class TestButtonBoxComponent(BaseComponentTests):
 
         for profile in DeviceManager.getAvailableDevices("psychopy.hardware.button.KeyboardButtonBox"):
             device = KeyboardButtonBoxDeviceBackend(profile)
-            device.params['deviceLabel'].val = "testButtonBox"
+            device.params['name'].val = "testButtonBox"
             prefs.devices['testButtonBox'] = device
             break
     
@@ -76,7 +76,7 @@ class TestButtonBoxComponent(BaseComponentTests):
         # make minimal experiment just for this test
         comp, rt, exp = self.make_minimal_experiment()
         # link to device
-        comp.params['deviceLabel'].val = "testButtonBox"
+        comp.params['name'].val = "testButtonBox"
         # configure experiment
         exp.requireImport("ButtonResponse", importFrom="psychopy.hardware.button")
         exp.settings.params['Full-screen window'].val = False

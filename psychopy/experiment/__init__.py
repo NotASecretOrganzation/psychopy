@@ -19,6 +19,7 @@ The code that writes out a *_lastrun.py experiment file is (in order):
 from .params import getCodeFromParamStr, Param
 from .components import getInitVals, getComponents, getAllComponents
 from .loops import getAllLoopTypes
+from .devices import getAllDeviceBackends
 from .routines import getAllStandaloneRoutines
 from ._experiment import Experiment
 from .utils import unescapedDollarSign_re, valid_var_re, nonalphanumeric_re
@@ -52,6 +53,17 @@ def getLoopProfiles():
         key: cls.getTemplateJSON()
         for key, cls
         in getAllLoopTypes().items()
+    }
+
+
+def getDeviceProfiles():
+    """
+    Get JSON template profiles for all device backends
+    """
+    return {
+        key: cls.getTemplateJSON()
+        for key, cls
+        in getAllDeviceBackends().items()
     }
 
 

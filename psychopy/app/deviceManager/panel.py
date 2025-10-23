@@ -104,7 +104,7 @@ class DevicePanel(ScrolledPanel):
                     sizer, border=6, flag=wx.EXPAND | wx.ALL
                 )
                 # store name param ctrl
-                if name == "deviceLabel":
+                if name == "name":
                     self.nameCtrl = self.paramCtrls[name]
                     # bump up the font size
                     self.nameCtrl.ctrl.SetFont(fonts.AppFont(
