@@ -76,7 +76,7 @@ class TestButtonBoxComponent(BaseComponentTests):
         # make minimal experiment just for this test
         comp, rt, exp = self.make_minimal_experiment()
         # link to device
-        comp.params['name'].val = "testButtonBox"
+        comp.params['deviceLabel'].val = "testButtonBox"
         # configure experiment
         exp.requireImport("ButtonResponse", importFrom="psychopy.hardware.button")
         exp.settings.params['Full-screen window'].val = False
