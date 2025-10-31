@@ -1,5 +1,9 @@
 // WebGL Scene Manager for 3D Interactive Demo
 
+// Constants for vertex counts
+const CUBE_VERTEX_COUNT = 24;
+const PYRAMID_VERTEX_COUNT = 8;
+
 class WebGLScene {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
@@ -352,7 +356,7 @@ class WebGLScene {
         
         // Update color buffer for current shape
         const buffer = this.buffers[this.currentShape];
-        const colorCount = this.currentShape === 'cube' ? 24 : 8;
+        const colorCount = this.currentShape === 'cube' ? CUBE_VERTEX_COUNT : PYRAMID_VERTEX_COUNT;
         const colors = [];
         
         for (let i = 0; i < colorCount; i++) {

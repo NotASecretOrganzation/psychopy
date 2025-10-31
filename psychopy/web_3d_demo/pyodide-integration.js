@@ -98,12 +98,21 @@ async function installPackage(packageName) {
         return false;
     }
     
+    // Validate package name to prevent injection
+    const packageNameRegex = /^[a-zA-Z0-9._-]+$/;
+    if (!packageNameRegex.test(packageName)) {
+        logToConsole(`Invalid package name: ${packageName}`, 'error');
+        return false;
+    }
+    
     try {
         logToConsole(`Installing ${packageName} via micropip...`);
         
+        // Use pyodide.globals to safely pass the package name
+        pyodide.globals.set('package_to_install', packageName);
         await pyodide.runPythonAsync(`
             import micropip
-            await micropip.install('${packageName}')
+            await micropip.install(package_to_install)
         `);
         
         logToConsole(`${packageName} installed successfully!`, 'success');
@@ -204,10 +213,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-run-python').addEventListener('click', async () => {
         logToConsole('Running Python demo script...');
         
-        const result = await runPythonCode(demoPythonScript);
-        
         if (result !== null) {
-            // Capture Python stdout
+            // Capture Python stdout using safer approach
+            pyodide.globals.set('demo_script', demoPythonScript);
             const stdout = await pyodide.runPythonAsync(`
                 import sys
                 from io import StringIO
@@ -215,7 +223,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 old_stdout = sys.stdout
                 sys.stdout = StringIO()
                 
-                ${demoPythonScript}
+                try:
+                    exec(demo_script)
+                except Exception as e:
+                    print(f"Error: {e}")
                 
                 output = sys.stdout.getvalue()
                 sys.stdout = old_stdout

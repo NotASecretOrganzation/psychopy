@@ -221,10 +221,20 @@ print(f"Actual refresh rate: {1000.0/mean_frame_time:.2f} Hz")
 
 # Response time analysis
 print("\\nSimulating response time data...")
+
+# Constants for response time simulation
+TRIALS_PER_CONDITION = 20
+SIMPLE_RT_MEAN = 250  # ms
+SIMPLE_RT_SD = 30     # ms
+CHOICE_RT_MEAN = 400  # ms
+CHOICE_RT_SD = 50     # ms
+COMPLEX_RT_MEAN = 650 # ms
+COMPLEX_RT_SD = 80    # ms
+
 conditions = {
-    "simple": [random.gauss(250, 30) for _ in range(20)],
-    "choice": [random.gauss(400, 50) for _ in range(20)],
-    "complex": [random.gauss(650, 80) for _ in range(20)]
+    "simple": [random.gauss(SIMPLE_RT_MEAN, SIMPLE_RT_SD) for _ in range(TRIALS_PER_CONDITION)],
+    "choice": [random.gauss(CHOICE_RT_MEAN, CHOICE_RT_SD) for _ in range(TRIALS_PER_CONDITION)],
+    "complex": [random.gauss(COMPLEX_RT_MEAN, COMPLEX_RT_SD) for _ in range(TRIALS_PER_CONDITION)]
 }
 
 for condition, times in conditions.items():
