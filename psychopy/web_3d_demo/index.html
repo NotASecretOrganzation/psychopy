@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsychoPy 3D Interactive Demo - Pyodide + WebGL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(45deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .console {
+            background: #1a1a2e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        
+        .console-line {
+            margin: 5px 0;
+        }
+        
+        .info-panel {
+            grid-column: 1 / -1;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .feature {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #667eea;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        
+        .status.ready {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .status.loading {
+            background: #ff9800;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 PsychoPy 3D Interactive Demo</h1>
+            <p class="subtitle">WebGL + Pyodide + Micropip Integration</p>
+            <div id="status-badge">
+                <span class="status loading">Loading Pyodide...</span>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2>🎮 3D WebGL Scene</h2>
+                <div id="canvas-container">
+                    <canvas id="webgl-canvas"></canvas>
+                </div>
+                <div class="controls">
+                    <button id="btn-rotate" disabled>Start Rotation</button>
+                    <button id="btn-color" disabled>Change Color</button>
+                    <button id="btn-shape" disabled>Change Shape</button>
+                    <button id="btn-reset" disabled>Reset Scene</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>🐍 Python Console (Pyodide)</h2>
+                <div id="console" class="console">
+                    <div class="console-line">Initializing Pyodide environment...</div>
+                </div>
+                <div class="controls">
+                    <button id="btn-run-python" disabled>Run Python Demo</button>
+                    <button id="btn-install-pkg" disabled>Install Package via Micropip</button>
+                    <button id="btn-clear-console" disabled>Clear Console</button>
+                </div>
+            </div>
+            
+            <div class="panel info-panel">
+                <h2>ℹ️ Technology Stack</h2>
+                <div class="feature-grid">
+                    <div class="feature">
+                        <h3>📦 Pyodide</h3>
+                        <p>Python runtime compiled to WebAssembly, enabling Python execution in the browser</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🔧 Micropip</h3>
+                        <p>Package installer for Pyodide that fetches packages from PyPI</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🎨 WebGL</h3>
+                        <p>Hardware-accelerated 3D graphics API for rendering interactive 3D scenes</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🧠 PsychoPy</h3>
+                        <p>Behavioral science experiment framework with web integration capabilities</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    
+    <!-- WebGL and Application Logic -->
+    <script src="webgl-scene.js"></script>
+    <script src="pyodide-integration.js"></script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsychoPy 3D Demo - Offline Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(45deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+        }
+        
+        .info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 PsychoPy 3D Interactive Demo</h1>
+            <p class="subtitle">WebGL-based 3D Graphics (Offline Version)</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2>🎮 3D WebGL Scene</h2>
+                <div id="canvas-container">
+                    <canvas id="webgl-canvas"></canvas>
+                </div>
+                <div class="controls">
+                    <button id="btn-rotate">Start Rotation</button>
+                    <button id="btn-color">Change Color</button>
+                    <button id="btn-shape">Change Shape</button>
+                    <button id="btn-reset">Reset Scene</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>📊 Scene Statistics</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Frame Rate</div>
+                        <div class="stat-value" id="fps">60</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Rotation</div>
+                        <div class="stat-value" id="rotation">0°</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Shape</div>
+                        <div class="stat-value" id="shape">Cube</div>
+                    </div>
+                </div>
+                
+                <div class="info">
+                    <h3>About This Demo</h3>
+                    <p>This is a standalone WebGL demonstration that runs entirely in your browser without external dependencies.</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Uses native WebGL API for 3D rendering</li>
+                        <li>No external libraries required</li>
+                        <li>Hardware-accelerated graphics</li>
+                        <li>Real-time interaction</li>
+                    </ul>
+                </div>
+                
+                <div class="info" style="margin-top: 15px;">
+                    <h3>For Full Features</h3>
+                    <p>Open <code>index.html</code> to access the full demo with Pyodide integration for running Python code in the browser.</p>
+                </div>
+            </div>
+            
+            <div class="panel full-width">
+                <h2>💡 Usage Instructions</h2>
+                <p><strong>Controls:</strong></p>
+                <ul style="margin: 15px 0 15px 20px; line-height: 1.8;">
+                    <li><strong>Start/Stop Rotation:</strong> Toggle automatic rotation of the 3D object</li>
+                    <li><strong>Change Color:</strong> Randomize the colors of the shape</li>
+                    <li><strong>Change Shape:</strong> Switch between different 3D shapes (cube, pyramid)</li>
+                    <li><strong>Reset Scene:</strong> Return to initial state</li>
+                </ul>
+                
+                <p style="margin-top: 20px;"><strong>Technical Details:</strong></p>
+                <p style="margin-top: 10px;">
+                    This demo uses WebGL shaders to render 3D geometry with vertex and fragment shaders. 
+                    The scene includes perspective projection, model-view transformations, and real-time 
+                    color updates. All rendering is performed on the GPU for smooth 60 FPS animation.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="webgl-scene.js"></script>
+    <script>
+        // Initialize scene and UI
+        let scene;
+        let frameCount = 0;
+        let lastTime = performance.now();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            scene = new WebGLScene('webgl-canvas');
+            
+            // Setup controls
+            document.getElementById('btn-rotate').addEventListener('click', function() {
+                const isRotating = scene.toggleRotation();
+                this.textContent = isRotating ? 'Stop Rotation' : 'Start Rotation';
+            });
+            
+            document.getElementById('btn-color').addEventListener('click', () => {
+                scene.changeColor();
+            });
+            
+            document.getElementById('btn-shape').addEventListener('click', () => {
+                const newShape = scene.changeShape();
+                document.getElementById('shape').textContent = 
+                    newShape.charAt(0).toUpperCase() + newShape.slice(1);
+            });
+            
+            document.getElementById('btn-reset').addEventListener('click', () => {
+                scene.reset();
+                document.getElementById('btn-rotate').textContent = 'Start Rotation';
+                document.getElementById('shape').textContent = 'Cube';
+            });
+            
+            // Update stats
+            function updateStats() {
+                // Update rotation display
+                const rotationDegrees = Math.round((scene.rotation * 180 / Math.PI) % 360);
+                document.getElementById('rotation').textContent = rotationDegrees + '°';
+                
+                // Calculate FPS
+                frameCount++;
+                const currentTime = performance.now();
+                if (currentTime - lastTime >= 1000) {
+                    document.getElementById('fps').textContent = frameCount;
+                    frameCount = 0;
+                    lastTime = currentTime;
+                }
+                
+                requestAnimationFrame(updateStats);
+            }
+            
+            updateStats();
+        });
+    </script>
+</body>
+</html>
